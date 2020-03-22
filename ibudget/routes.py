@@ -8,5 +8,5 @@ def home():
 
 
 @app.route('/ibudget')
-def home():
-    return render_template('budget.html')
+def ibudget():
+    return render_template('ibudget.html')
