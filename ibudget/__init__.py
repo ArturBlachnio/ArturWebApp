@@ -2,4 +2,4 @@ from flask import Flask
 
 app = Flask(__name__)
 
-from blachnio import routes
+from ibudget import routes

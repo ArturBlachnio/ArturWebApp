@@ -1,4 +1,4 @@
-from blachnio import app
+from ibudget import app
 from flask import render_template
 
 
