@@ -1,0 +1,24 @@
+body {
+  background: #fafafa;
+  color: #333333;
+  margin-top: 5rem;
+}
+
+.content-section {
+  background: #ffffff;
+  padding: 10px 20px;
+  border: 1px solid #dddddd;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
+
+.art_border_rad{
+    border-radius: 15px;
+    padding-left: 15px;
+    margin: 3px;
+}
+
+.art_table{
+    margin: 0px;
+    font-size: 0.7rem;
+}
