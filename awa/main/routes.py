@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-main = Blueprint('main', __name__)
+main = Blueprint(name='main', import_name=__name__)
 
 
 @main.route('/')

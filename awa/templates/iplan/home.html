@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <!-- action="" means that if we post the form (click submit) it will go to same route, will not move us fr new page -->
+        <form method="POST" action="">
+        {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom  mb-4">New Category</legend>
+                <div class="form-group">
+                    {{ formcat.name.label(class="form-control-label") }}
+                    {% if formcat.name.errors %}
+                        {{ formcat.name(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in formcat.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ formcat.name(class="form-control form-control-sm", value='TaskCat') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ formcat.cat3.label(class="form-control-label") }}
+                    {% if formcat.cat3.errors %}
+                        {{ formcat.cat3(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in formcat.cat3.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ formcat.cat3(class="form-control form-control-sm", value='TSK') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ formcat.color.label(class="form-control-label") }}
+                    {% if formcat.color.errors %}
+                        {{ formcat.color(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in formcat.color.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ formcat.color(class="form-control form-control-sm", value='#f3d2f1') }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <!-- submit button-->
+            <div class="form-group">
+                {{ formcat.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+
+    <div class="content-section">
+        <!-- action="" means that if we post the form (click submit) it will go to same route, will not move us fr new page -->
+        <form method="POST" action="">
+        {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom  mb-4">New Task</legend>
+                <div class="form-group">
+                    {{ form.title.label(class="form-control-label") }}
+                    {% if form.title.errors %}
+                        {{ form.title(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.title.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.title(class="form-control form-control-sm", placeholder='Task') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.category.label(class="form-control-label") }}
+                    {{ form.category(class="form-control form-control-sm")}}
+                </div>
+                <div class="form-group">
+                    {{ form.description.label(class="form-control-label") }}
+                    {% if form.description.errors %}
+                        {{ form.description(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.description.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.description(class="form-control form-control-sm", placeholder='Description') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.plan.label(class="form-control-label") }}
+                    {% if form.plan.errors %}
+                        {{ form.plan(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.plan.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.plan(class="form-control form-control-sm", placeholder='0h 0m')}}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.actual.label(class="form-control-label") }}
+                    {% if form.actual.errors %}
+                        {{ form.actual(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.actual.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.actual(class="form-control form-control-sm", placeholder='0h 0m')}}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                        {{ form.frequency.label(class="form-control-label") }}
+                        {{ form.frequency(class="form-control form-control-sm")}}
+                </div>
+            </fieldset>
+            <!-- submit button-->
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+    <hr>
+    {% for task in tasks %}
+        <div class="row">
+            <div class="col">
+            <small class="text-muted">
+                <p class="border rounded text-secondary m-1 p-1 mx-auto">
+                    <a href="{{url_for('iplan.delete_task', task_id=task.id) }}">{{ task }}{{ task.category }}</a>
+                </p>
+            </div>
+            <div class="col-1 border rounded-circle text-secondary m-1 p-1" style="background-color: {{task.category.color}}">
+            </div>
+            </small>
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="container">
+    <hr>
+    {% for cat in categories %}
+        <div class="row">
+            <div class="col-1 border rounded-circle text-secondary m-1 p-1" style="background-color: {{cat.color}}">
+            </div>
+            <div class="col">
+            <small class="text-muted">
+                <p class="border rounded text-secondary m-1 p-1">
+                    {{ cat }}
+                </p>
+
+            </small>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock content %}

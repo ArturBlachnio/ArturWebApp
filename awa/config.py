@@ -1,7 +1,7 @@
 class TestConfig:
     SECRET_KEY = 'c28e87882654f5d1e84b6e1a0c12a77f'
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'  # Test
-    # SQLALCHEMY_TRACK_MODIFICATIONS = False  # Removes some notification in cmd
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///site.db'  # Test
+    SQLALCHEMY_TRACK_MODIFICATIONS = False  # Removes some notification in cmd
 
 
 # class Config:

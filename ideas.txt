@@ -1,0 +1,8 @@
+# We can use multipla databases. Read here more:
+https://flask-appbuilder.readthedocs.io/en/latest/multipledbs.html
+
+# SQL alchemy columns
+https://flask-sqlalchemy.palletsprojects.com/en/2.x/models/
+
+# Explanation of why initial creation of db was not working
+https://stackoverflow.com/questions/44941757/sqlalchemy-exc-operationalerror-sqlite3-operationalerror-no-such-table/44944205

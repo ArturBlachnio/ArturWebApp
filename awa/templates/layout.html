@@ -11,6 +11,8 @@
     <!-- main.css | scr: corey snippets - used for navbar -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 
+    {% block head_scripts %}{% endblock head_scripts%}
+
     <!-- My title -->
     <title>
         {% if title %}
@@ -26,14 +28,15 @@
         <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
             <div class="container">
             <!-- Collapse button for small screens -->
-                <a class="navbar-brand" href="{{ url_for('main.home') }}">ArturWebApp</a>
+                <a class="navbar-brand" href="{{ url_for('main.home') }}">ArtWebApp</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="navbar-nav mr-auto">
-                        <a class="nav-item nav-link" href="{{ url_for('main.home') }}">iPlan</a>
+                        <a class="nav-item nav-link" href="{{ url_for('iplan.home') }}">iPlan</a>
+                        <a class="nav-item nav-link" href="{{ url_for('ibudget.home')}}">iBudget</a>
                     </div>
                     <!-- Navigation bar Right Side -->
                     <div class="navbar-nav">
