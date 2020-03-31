@@ -1,61 +1,8 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="content-section">
+     <div class="content-section">
         <!-- action="" means that if we post the form (click submit) it will go to same route, will not move us fr new page -->
-        <form method="POST" action="">
-        {{ form.hidden_tag() }}
-            <fieldset class="form-group">
-                <legend class="border-bottom  mb-4">New Category</legend>
-                <div class="form-group">
-                    {{ formcat.name.label(class="form-control-label") }}
-                    {% if formcat.name.errors %}
-                        {{ formcat.name(class="form-control form-control-sm is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in formcat.name.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ formcat.name(class="form-control form-control-sm", value='TaskCat') }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ formcat.cat3.label(class="form-control-label") }}
-                    {% if formcat.cat3.errors %}
-                        {{ formcat.cat3(class="form-control form-control-sm is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in formcat.cat3.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ formcat.cat3(class="form-control form-control-sm", value='TSK') }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ formcat.color.label(class="form-control-label") }}
-                    {% if formcat.color.errors %}
-                        {{ formcat.color(class="form-control form-control-sm is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in formcat.color.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ formcat.color(class="form-control form-control-sm", value='#f3d2f1') }}
-                    {% endif %}
-                </div>
-            </fieldset>
-            <!-- submit button-->
-            <div class="form-group">
-                {{ formcat.submit(class="btn btn-outline-info") }}
-            </div>
-        </form>
-    </div>
-
-    <div class="content-section">
-        <!-- action="" means that if we post the form (click submit) it will go to same route, will not move us fr new page -->
-        <form method="POST" action="">
+         <form method="POST" action="">
         {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom  mb-4">New Task</legend>
@@ -127,6 +74,28 @@
         </form>
     </div>
 
+   <div class="content-section">
+       List of tasks:
+        {% for task in tasks %}
+        <div class="row">
+            <div class="col-6 rounded-left mt-1 mb-1" style="background-color:{{task.category.color}}">
+                {{task.title}}
+            </div>
+            <div class="col border rounded-right mt-1 mb-1">
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small>id={{task.id}}, cat3={{task.category.cat3}}, freq={{task.frequency}}</small>
+                    </div>
+                    <div class="col-auto ml-auto">
+                        <a href="#" class="badge badge-secondary">Update</a>
+                        <a href="{{url_for('iplan.delete_task', task_id=task.id) }}" class="badge badge-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
     <div class="container">
     <hr>
     {% for task in tasks %}
@@ -140,24 +109,6 @@
             <div class="col-1 border rounded-circle text-secondary m-1 p-1" style="background-color: {{task.category.color}}">
             </div>
             </small>
-        </div>
-    {% endfor %}
-    </div>
-
-    <div class="container">
-    <hr>
-    {% for cat in categories %}
-        <div class="row">
-            <div class="col-1 border rounded-circle text-secondary m-1 p-1" style="background-color: {{cat.color}}">
-            </div>
-            <div class="col">
-            <small class="text-muted">
-                <p class="border rounded text-secondary m-1 p-1">
-                    {{ cat }}
-                </p>
-
-            </small>
-            </div>
         </div>
     {% endfor %}
     </div>

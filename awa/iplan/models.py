@@ -26,7 +26,7 @@ class Task(db.Model):
     end = db.Column(db.DateTime)
     complete = db.Column(db.Boolean, nullable=False, default=False)
     frequency = db.Column(db.String(10), nullable=False, default='OneTime')  # Onetime or repeatable
-    category_id = db.Column(db.Integer, db.ForeignKey('task_category.id'), nullable=False)  # Not sure what is default table name?
+    category_id = db.Column(db.Integer, db.ForeignKey('task_category.id'), nullable=False)
     # categories = db.relationship('TaskCategory', back_populates='task_category')
 
     def __repr__(self):

@@ -20,4 +20,4 @@ class TaskCategoryForm(FlaskForm):
     name = StringField(label='Category Name', validators=[DataRequired(), Length(max=30)])
     cat3 = StringField(label='Category 3-digit Symbol', validators=[DataRequired(), Length(max=30)])
     color = StringField(label='Color', validators=[DataRequired(), Length(max=30)])
-    submit = SubmitField(label='Add Category')
+    submit = SubmitField(label='Submit')
