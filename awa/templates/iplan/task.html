@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+       List of tasks:
+        {% for task in tasks %}
+        <div class="row">
+            <div class="col-6 rounded-left mt-1 mb-1" style="background-color:{{task.strategy.color}}">
+                {{task.name}}
+            </div>
+            <div class="col border rounded-right mt-1 mb-1">
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small>id={{task.id}}, freq={{task.frequency}}, order={{task.order}}</small>
+                    </div>
+                    <div class="col-auto ml-auto">
+                        <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary">Update</a>
+                        <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+   <div class="content-section">
+        {% for task in tasks %}
+        <div class="row">
+            <div class="col border rounded-right mt-1 mb-1">
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small class="text-muted">{{ task }} <> {{ task.strategy }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+{% endblock content %}
+

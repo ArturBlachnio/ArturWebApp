@@ -5,7 +5,7 @@
         <form method="POST" action="">
         {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom  mb-4">New Category</legend>
+                <legend class="border-bottom  mb-4">{{legend}}</legend>
                 <div class="form-group">
                     {{ form.name.label(class="form-control-label") }}
                     {% if form.name.errors %}
@@ -16,20 +16,33 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.name(class="form-control form-control-sm", placeholder='Category') }}
+                        {{ form.name(class="form-control form-control-sm", placeholder='Strategy') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.cat3.label(class="form-control-label") }}
-                    {% if form.cat3.errors %}
-                        {{ form.cat3(class="form-control form-control-sm is-invalid") }}
+                    {{ form.symbol.label(class="form-control-label") }}
+                    {% if form.symbol.errors %}
+                        {{ form.symbol(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form.cat3.errors %}
+                            {% for error in form.symbol.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.cat3(class="form-control form-control-sm", placeholder='CAT') }}
+                        {{ form.symbol(class="form-control form-control-sm", placeholder='ABC') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.desc.label(class="form-control-label") }}
+                    {% if form.desc.errors %}
+                        {{ form.desc(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.desc.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.desc(class="form-control form-control-sm", placeholder='Description') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
@@ -42,7 +55,20 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.color(class="form-control form-control-sm", placeholder='#123456') }}
+                        {{ form.color(class="form-control form-control-sm", placeholder='#color') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.order.label(class="form-control-label") }}
+                    {% if form.order.errors %}
+                        {{ form.order(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.order.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.order(class="form-control form-control-sm", placeholder=999) }}
                     {% endif %}
                 </div>
             </fieldset>
@@ -51,31 +77,5 @@
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
         </form>
-    </div>
-
-   <div class="content-section">
-       List of Categories:
-        {% for cat in categories %}
-        <div class="row">
-            <div class="col-4 rounded-left mt-1 mb-1" style="background-color:{{cat.color}}">
-                {{cat.name}}
-            </div>
-            <div class="col border rounded-right mt-1 mb-1">
-                <div class="row p-0">
-                    <div class="col-auto">
-                        <small>id={{cat.id}}, cat3={{cat.cat3}}, color={{cat.color}}</small>
-                    </div>
-                    <div class="col-auto ml-auto">
-                        <a href="{{url_for('iplan.category_update', category_id=cat.id)}}" class="badge badge-secondary">Update</a>
-                        {% if count_tasks[cat.id] != 0 %}
-                            <a href="{{url_for('iplan.category_delete', category_id=cat.id)}}" class="badge badge-danger">Delete ({{count_tasks[cat.id]}})</a>
-                        {% else %}
-                            <a href="{{url_for('iplan.category_delete', category_id=cat.id)}}" class="badge badge-warning">Delete ({{count_tasks[cat.id]}})</a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
     </div>
 {% endblock content %}

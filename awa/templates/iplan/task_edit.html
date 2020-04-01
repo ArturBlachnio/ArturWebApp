@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block content %}
+     <div class="content-section">
+        <!-- action="" means that if we post the form (click submit) it will go to same route, will not move us fr new page -->
+         <form method="POST" action="">
+        {{ form_task.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom  mb-4">{{legend}}</legend>
+                <div class="form-group">
+                    {{ form_task.name.label(class="form-control-label") }}
+                    {% if form_task.name.errors %}
+                        {{ form_task.name(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.name(class="form-control form-control-sm", placeholder='Task') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_task.strategy.label(class="form-control-label") }}
+                    {{ form_task.strategy(class="form-control form-control-sm")}}
+                </div>
+                <div class="form-group">
+                    {{ form_task.desc.label(class="form-control-label") }}
+                    {% if form_task.desc.errors %}
+                        {{ form_task.desc(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.desc.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.desc(class="form-control form-control-sm", placeholder='Description') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_task.plan.label(class="form-control-label") }}
+                    {% if form_task.plan.errors %}
+                        {{ form_task.plan(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.plan.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.plan(class="form-control form-control-sm", placeholder='0h 0m')}}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_task.actual.label(class="form-control-label") }}
+                    {% if form_task.actual.errors %}
+                        {{ form_task.actual(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.actual.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.actual(class="form-control form-control-sm", placeholder='0h 0m')}}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                        {{ form_task.frequency.label(class="form-control-label") }}
+                        {{ form_task.frequency(class="form-control form-control-sm")}}
+                </div>
+                <div class="form-group">
+                    {{ form_task.order.label(class="form-control-label") }}
+                    {% if form_task.order.errors %}
+                        {{ form_task.order(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.order.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.order(class="form-control form-control-sm", placeholder='999')}}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <!-- submit button-->
+            <div class="form-group">
+                {{ form_task.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}

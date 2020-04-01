@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block content %}
+    <!-- Strategy list: -->
+    <!-- Nice color picker here https://www.w3schools.com/colors/colors_names.asp-->
+   <div class="content-section">
+       Your strategies:
+        {% for item in strategies %}
+        <div class="row">
+            <div class="col-4 rounded-left mt-1 mb-1" style="background-color:{{item.color}}">
+                {{item.name}}
+            </div>
+            <div class="col border rounded-right mt-1 mb-1">
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small>id={{item.id}}, order={{item.order}}</small>
+                    </div>
+                    <div class="col-auto ml-auto">
+                        <a href="{{url_for('iplan.strategy_update', id_strategy=item.id)}}" class="badge badge-secondary">Update</a>
+                        {% if count_tasks[item.id] != 0 %}
+                            <a href="{{url_for('iplan.strategy_delete', id_strategy=item.id)}}" class="badge badge-danger">Delete ({{count_tasks[item.id]}})</a>
+                        {% else %}
+                            <a href="{{url_for('iplan.strategy_delete', id_strategy=item.id)}}" class="badge badge-warning">Delete ({{count_tasks[item.id]}})</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+   <div class="content-section">
+        {% for item in strategies %}
+        <div class="row">
+            <div class="col border rounded-right mt-1 mb-1">
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small class="text-muted">{{item}}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock content %}
