@@ -16,7 +16,7 @@ def home():
 
 @iplan.route('/iplan/task', methods=['GET', 'POST'])
 def task():
-    tasks = Task.query.all()
+    tasks = Task.query.order_by(Task.order).all()
     strategies = Strategy.query.all()
     return render_template('iplan/task.html', tasks=tasks, strategies=strategies)
 
@@ -25,7 +25,7 @@ def task():
 def task_create():
     form_task = TaskForm()
     # Dynamic choices
-    form_task.strategy.choices = [(item.id, item.name) for item in Strategy.query.all()]
+    form_task.strategy.choices = [(item.id, item.name) for item in Strategy.query.order_by(Strategy.order).all()]
 
     if form_task.validate_on_submit():
         task = Task(name=form_task.name.data, desc=form_task.desc.data,
@@ -83,7 +83,7 @@ def task_delete(id_task):
 
 @iplan.route('/iplan/strategy', methods=['GET', 'POST'])
 def strategy():
-    strategies = Strategy.query.all()
+    strategies = Strategy.query.order_by(Strategy.order).all()
     # todo - count using sql
     count_tasks = {item.id: len(Task.query.filter_by(id_strategy=item.id).all()) for item in strategies}
     return render_template('iplan/strategy.html', strategies=strategies, legend='Create New Strategy',
