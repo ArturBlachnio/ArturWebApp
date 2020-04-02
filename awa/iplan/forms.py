@@ -19,6 +19,7 @@ class TaskForm(FlaskForm):
 
 class StrategyForm(FlaskForm):
     name = StringField(label='Name', validators=[DataRequired(), Length(max=30)])
+    category = SelectField(label='Category', coerce=int)
     symbol = StringField(label='Symbol', validators=[Length(max=3)])
     desc = StringField(label='Description')
     color = StringField(label='Color Hex')

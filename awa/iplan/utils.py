@@ -2,6 +2,12 @@ from datetime import timedelta
 import re
 
 
+def reverse_dict(x):
+    """ Applied for SelectField choices in updating forms
+    Creates dict from list of tuples [(1,a), (9,z)] -> {a:1, z:9} """
+    return {v: k for (k, v) in dict(x).items()}
+
+
 def duration_from_string(x):
     """ Converts string to valid datatime.timedelta
     Valid string format examples: 3d, 10h 5m, 1h 3s, 30m2s, etc

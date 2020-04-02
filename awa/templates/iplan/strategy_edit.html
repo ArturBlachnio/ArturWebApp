@@ -20,6 +20,18 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
+                    {{ form.category.label(class="form-control-label") }}
+                    {% if form.category.errors %}
+                        {{ form.category(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.category.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.category(class="form-control form-control-sm", placeholder='Strategy') }}
+                    {% endif %}
+                </div>                <div class="form-group">
                     {{ form.symbol.label(class="form-control-label") }}
                     {% if form.symbol.errors %}
                         {{ form.symbol(class="form-control form-control-sm is-invalid") }}
