@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired, Length
 
 
 class TaskForm(FlaskForm):
-    name = StringField(label='Name', validators=[DataRequired(), Length(min=2, max=40)])
+    name = StringField(label='Name', validators=[DataRequired(), Length(min=2, max=140)])
     strategy = SelectField(label='Strategy', coerce=int)  # Dynamically determined in route
     desc = StringField(label='Description')
     plan = StringField(label='Planned')  # Is converted to Interval with duration_from_string
@@ -18,7 +18,7 @@ class TaskForm(FlaskForm):
 
 
 class StrategyForm(FlaskForm):
-    name = StringField(label='Name', validators=[DataRequired(), Length(max=30)])
+    name = StringField(label='Name', validators=[DataRequired(), Length(max=40)])
     category = SelectField(label='Category', coerce=int)
     symbol = StringField(label='Symbol', validators=[Length(max=3)])
     desc = StringField(label='Description')

@@ -20,6 +20,7 @@ class Strategy(db.Model):
     time_completion = db.Column(db.DateTime)
     category = db.Column(db.String(20), nullable=True)
     br_task = db.relationship('Task', backref='strategy')  # todo: lazy=True - test that later
+    br_project = db.relationship('Project', backref='strategy')  # todo: lazy=True - test that later
 
     def __repr__(self):
         return f"Strategy(id='{self.id}', name='{self.name}', symbol='{self.symbol}', desc='{self.desc}'," \
@@ -30,11 +31,12 @@ class Strategy(db.Model):
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(40), nullable=False)
+    id_strategy = db.Column(db.Integer, db.ForeignKey('strategy.id'), nullable=False)
 
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), nullable=False)
+    name = db.Column(db.String(140), nullable=False)
     desc = db.Column(db.Text)
     plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
     actual = db.Column(db.Interval, nullable=False, default=timedelta(0))

@@ -3,6 +3,8 @@ from awa import db
 from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan.utils import duration_from_string, string_from_duration, reverse_dict
+from awa.iplan._initial_setup import *
+
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -90,17 +92,15 @@ def strategy():
                            count_tasks=count_tasks)
 
 
-strategy_category_choices = [(1, 'AAAStrategic'), (2, 'Productive'), (3, 'Untracked')]
-
 @iplan.route('/iplan/strategy/create', methods=['GET', 'POST'])
 def strategy_create():
     form = StrategyForm()
-    form.category.choices = strategy_category_choices
+    form.category.choices = STRATEGY_CATEGORY_CHOICES
 
     if form.validate_on_submit():
         item_strategy = Strategy(name=form.name.data, symbol=form.symbol.data, desc=form.desc.data,
                                  color=form.color.data, order=form.order.data,
-                                 category=dict(strategy_category_choices).get(form.category.data))
+                                 category=dict(STRATEGY_CATEGORY_CHOICES).get(form.category.data))
         db.session.add(item_strategy)
         db.session.commit()
         flash('New strategy has been created.', 'success')
@@ -114,7 +114,7 @@ def strategy_create():
 @iplan.route('/iplan/strategy/update/<id_strategy>', methods=['GET', 'POST'])
 def strategy_update(id_strategy):
     form = StrategyForm()
-    form.category.choices = strategy_category_choices
+    form.category.choices = STRATEGY_CATEGORY_CHOICES
 
     item_strategy = Strategy.query.get_or_404(id_strategy)
     if form.validate_on_submit():
@@ -123,7 +123,7 @@ def strategy_update(id_strategy):
         item_strategy.desc = form.desc.data
         item_strategy.color = form.color.data
         item_strategy.order = form.order.data
-        item_strategy.category = dict(strategy_category_choices).get(form.category.data)
+        item_strategy.category = dict(STRATEGY_CATEGORY_CHOICES).get(form.category.data)
         db.session.commit()
         flash('Strategy has been updated.', 'success')
         return redirect(url_for('iplan.strategy'))
@@ -133,7 +133,7 @@ def strategy_update(id_strategy):
         form.desc.data = item_strategy.desc
         form.color.data = item_strategy.color
         form.order.data = item_strategy.order
-        form.category.data = reverse_dict(strategy_category_choices).get(item_strategy.category, 1)
+        form.category.data = reverse_dict(STRATEGY_CATEGORY_CHOICES).get(item_strategy.category, 1)
         form.submit.label.text = 'Update'
     strategies = Strategy.query.all()
     # todo - count using sql
