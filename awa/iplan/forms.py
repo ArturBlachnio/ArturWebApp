@@ -1,17 +1,20 @@
+from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length
 
 
 class TaskForm(FlaskForm):
-    name = StringField(label='Name', validators=[DataRequired(), Length(min=2, max=140)])
-    strategy = SelectField(label='Strategy', coerce=int)  # Dynamically determined in route
+    name = StringField(label='Name', validators=[DataRequired(), Length(min=1, max=140)])
     desc = StringField(label='Description')
-    plan = StringField(label='Planned')  # Is converted to Interval with duration_from_string
-    actual = StringField(label='Actual')
-    # Coerce=int is essential here if choices are (int, str)
-    frequency = SelectField(label='Frequency', coerce=int, choices=[(1, 'OneTime'), (2, 'Continues')])
+    duration_plan = StringField(label='Duration Plan')  # Is converted to Interval with duration_from_string
+    duration_real = StringField(label='Duration Real')
+    category = SelectField(label='Category', coerce=int)
+    time_line = SelectField(label='Timeline', coerce=int)
+    # Coerce=int - browser sends data in str format so function is needed to transform it
+    frequency = SelectField(label='Frequency', coerce=int)
     order = IntegerField(label='Order')
+    id_strategy = SelectField(label='Strategy', coerce=int)
     submit = SubmitField(label='Add Task')
 
     # todo: validation of plan and actual duration input - to be consistent with duration_from_string

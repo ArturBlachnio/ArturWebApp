@@ -7,7 +7,7 @@
             <fieldset class="form-group">
                 <legend class="border-bottom  mb-4">{{legend}}</legend>
                 <div class="form-group">
-                    {{ form.name.label(class="form-control-label") }}
+                    {{ form.name.label(class="form-control-label text-info") }}
                     {% if form.name.errors %}
                         {{ form.name(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -16,11 +16,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.name(class="form-control form-control-sm", placeholder='Strategy') }}
+                        {{ form.name(class="form-control form-control-sm text-primary", placeholder='Strategy') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.category.label(class="form-control-label") }}
+                    {{ form.category.label(class="form-control-label text-info") }}
                     {% if form.category.errors %}
                         {{ form.category(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -29,10 +29,10 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.category(class="form-control form-control-sm", placeholder='Strategy') }}
+                        {{ form.category(class="form-control form-control-sm text-primary", placeholder='Strategy') }}
                     {% endif %}
                 </div>                <div class="form-group">
-                    {{ form.symbol.label(class="form-control-label") }}
+                    {{ form.symbol.label(class="form-control-label text-info") }}
                     {% if form.symbol.errors %}
                         {{ form.symbol(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -41,11 +41,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.symbol(class="form-control form-control-sm", placeholder='ABC') }}
+                        {{ form.symbol(class="form-control form-control-sm text-primary", placeholder='ABC') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.desc.label(class="form-control-label") }}
+                    {{ form.desc.label(class="form-control-label text-info") }}
                     {% if form.desc.errors %}
                         {{ form.desc(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -54,11 +54,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.desc(class="form-control form-control-sm", placeholder='Description') }}
+                        {{ form.desc(class="form-control form-control-sm text-primary", placeholder='Description') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.color.label(class="form-control-label") }}
+                    {{ form.color.label(class="form-control-label text-info") }}
                     {% if form.color.errors %}
                         {{ form.color(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -67,11 +67,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.color(class="form-control form-control-sm", placeholder='#color') }}
+                        {{ form.color(class="form-control form-control-sm text-primary", placeholder='#color') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.order.label(class="form-control-label") }}
+                    {{ form.order.label(class="form-control-label text-info") }}
                     {% if form.order.errors %}
                         {{ form.order(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -80,7 +80,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.order(class="form-control form-control-sm", placeholder=999) }}
+                        {{ form.order(class="form-control form-control-sm text-primary", placeholder=999) }}
                     {% endif %}
                 </div>
             </fieldset>

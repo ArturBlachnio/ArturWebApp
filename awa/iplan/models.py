@@ -38,18 +38,29 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(140), nullable=False)
     desc = db.Column(db.Text)
-    plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
-    actual = db.Column(db.Interval, nullable=False, default=timedelta(0))
-    start = db.Column(db.DateTime)
-    end = db.Column(db.DateTime)
-    complete = db.Column(db.Boolean, nullable=False, default=False)
-    frequency = db.Column(db.String(10), nullable=False, default='OneTime')  # Onetime or repeatable
+    category = db.Column(db.String(20))
+    frequency = db.Column(db.String(10))
+    time_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    time_completion = db.Column(db.DateTime)
+    time_line = db.Column(db.DateTime)
+    duration_plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
+    duration_real = db.Column(db.Interval, nullable=False, default=timedelta(0))
+    timer_start = db.Column(db.DateTime)
+    timer_end = db.Column(db.DateTime)
     order = db.Column(db.Integer)
     id_strategy = db.Column(db.Integer, db.ForeignKey('strategy.id'), nullable=False)
-    # categories = db.relationship('TaskCategory', back_populates='task_category')
+    id_project = db.Column(db.Integer, db.ForeignKey('project.id'))
+
+    # plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
+    # actual = db.Column(db.Interval, nullable=False, default=timedelta(0))
+    # start = db.Column(db.DateTime)
+    # end = db.Column(db.DateTime)
+    # complete = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
-        return f"Task(id='{self.id}', name='{self.name}', desc='{self.desc}', plan='{self.plan}'" \
-               f" actual='{self.actual}', start='{self.start}', end='{self.end}', " \
-               f" complete='{self.complete}', freq='{self.frequency}', order='{self.order}', id_strategy='{self.id_strategy}')"
-
+        return f"Task(id='{self.id}', name='{self.name}', desc='{self.desc}', category='{self.category}', " \
+               f"frequency='{self.frequency}', time_creation='{self.time_creation}', " \
+               f"time_completion='{self.time_completion}', time_line='{self.time_line}', " \
+               f"duration_plan='{self.duration_plan}', duration_real='{self.duration_real}', " \
+               f"timer_start='{self.timer_start}', timer_end='{self.timer_end}', order='{self.order}', " \
+               f"id_strategy='{self.id_strategy}', id_project='{self.id_project}')"

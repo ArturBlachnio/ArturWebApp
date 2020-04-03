@@ -7,7 +7,7 @@
             <fieldset class="form-group">
                 <legend class="border-bottom  mb-4">{{legend}}</legend>
                 <div class="form-group">
-                    {{ form_task.name.label(class="form-control-label") }}
+                    {{ form_task.name.label(class="form-control-label text-info text-info") }}
                     {% if form_task.name.errors %}
                         {{ form_task.name(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -16,15 +16,37 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.name(class="form-control form-control-sm", placeholder='Task') }}
+                        {{ form_task.name(class="form-control form-control-sm text-primary", placeholder='Task') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form_task.strategy.label(class="form-control-label") }}
-                    {{ form_task.strategy(class="form-control form-control-sm")}}
+                    {{ form_task.id_strategy.label(class="form-control-label text-info text-info") }}
+                    {% if form_task.id_strategy.errors %}
+                        {{ form_task.id_strategy(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.id_strategy.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.id_strategy(class="form-control form-control-sm text-primary", placeholder='Task') }}
+                    {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form_task.desc.label(class="form-control-label") }}
+                    {{ form_task.time_line.label(class="form-control-label text-info text-info") }}
+                    {% if form_task.time_line.errors %}
+                        {{ form_task.time_line(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.time_line.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.time_line(class="form-control form-control-sm text-primary", placeholder='Task') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_task.desc.label(class="form-control-label text-info") }}
                     {% if form_task.desc.errors %}
                         {{ form_task.desc(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -33,41 +55,62 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.desc(class="form-control form-control-sm", placeholder='Description') }}
+                        {{ form_task.desc(class="form-control form-control-sm text-primary", placeholder='Description') }}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form_task.plan.label(class="form-control-label") }}
-                    {% if form_task.plan.errors %}
-                        {{ form_task.plan(class="form-control form-control-sm is-invalid") }}
+                    {{ form_task.category.label(class="form-control-label text-info") }}
+                    {% if form_task.category.errors %}
+                        {{ form_task.category(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form_task.plan.errors %}
+                            {% for error in form_task.category.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.plan(class="form-control form-control-sm", placeholder='0h 0m')}}
+                        {{ form_task.category(class="form-control form-control-sm text-primary", placeholder='Description') }}
                     {% endif %}
-                </div>
                 <div class="form-group">
-                    {{ form_task.actual.label(class="form-control-label") }}
-                    {% if form_task.actual.errors %}
-                        {{ form_task.actual(class="form-control form-control-sm is-invalid") }}
+                    {{ form_task.frequency.label(class="form-control-label text-info") }}
+                    {% if form_task.frequency.errors %}
+                        {{ form_task.frequency(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form_task.actual.errors %}
+                            {% for error in form_task.frequency.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.actual(class="form-control form-control-sm", placeholder='0h 0m')}}
+                        {{ form_task.frequency(class="form-control form-control-sm text-primary", placeholder='Description') }}
+                    {% endif %}
+                </div>
+                </div>                <div class="form-group">
+                    {{ form_task.duration_plan.label(class="form-control-label text-info") }}
+                    {% if form_task.duration_plan.errors %}
+                        {{ form_task.duration_plan(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.duration_plan.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.duration_plan(class="form-control form-control-sm text-primary", placeholder='0h 0m')}}
                     {% endif %}
                 </div>
                 <div class="form-group">
-                        {{ form_task.frequency.label(class="form-control-label") }}
-                        {{ form_task.frequency(class="form-control form-control-sm")}}
+                    {{ form_task.duration_real.label(class="form-control-label text-info") }}
+                    {% if form_task.duration_real.errors %}
+                        {{ form_task.duration_real(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.duration_real.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.duration_real(class="form-control form-control-sm text-primary", placeholder='0h 0m')}}
+                    {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form_task.order.label(class="form-control-label") }}
+                    {{ form_task.order.label(class="form-control-label text-info") }}
                     {% if form_task.order.errors %}
                         {{ form_task.order(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
@@ -76,7 +119,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.order(class="form-control form-control-sm", placeholder='999')}}
+                        {{ form_task.order(class="form-control form-control-sm text-primary", placeholder='999')}}
                     {% endif %}
                 </div>
             </fieldset>

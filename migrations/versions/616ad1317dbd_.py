@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 638b048cd32f
+Revision ID: 616ad1317dbd
 Revises: 
-Create Date: 2020-04-02 18:32:31.175635
+Create Date: 2020-04-02 21:27:19.108500
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '638b048cd32f'
+revision = '616ad1317dbd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,16 +39,21 @@ def upgrade():
     )
     op.create_table('task',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=40), nullable=False),
+    sa.Column('name', sa.String(length=140), nullable=False),
     sa.Column('desc', sa.Text(), nullable=True),
-    sa.Column('plan', sa.Interval(), nullable=False),
-    sa.Column('actual', sa.Interval(), nullable=False),
-    sa.Column('start', sa.DateTime(), nullable=True),
-    sa.Column('end', sa.DateTime(), nullable=True),
-    sa.Column('complete', sa.Boolean(), nullable=False),
-    sa.Column('frequency', sa.String(length=10), nullable=False),
+    sa.Column('category', sa.String(length=20), nullable=True),
+    sa.Column('frequency', sa.String(length=10), nullable=True),
+    sa.Column('time_creation', sa.DateTime(), nullable=True),
+    sa.Column('time_completion', sa.DateTime(), nullable=True),
+    sa.Column('time_line', sa.DateTime(), nullable=True),
+    sa.Column('duration_plan', sa.Interval(), nullable=False),
+    sa.Column('duration_real', sa.Interval(), nullable=False),
+    sa.Column('timer_start', sa.DateTime(), nullable=True),
+    sa.Column('timer_end', sa.DateTime(), nullable=True),
     sa.Column('order', sa.Integer(), nullable=True),
     sa.Column('id_strategy', sa.Integer(), nullable=False),
+    sa.Column('id_project', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['id_project'], ['project.id'], ),
     sa.ForeignKeyConstraint(['id_strategy'], ['strategy.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

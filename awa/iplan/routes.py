@@ -2,9 +2,9 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request
 from awa import db
 from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
-from awa.iplan.utils import duration_from_string, string_from_duration, reverse_dict
+from awa.iplan.utils import duration_from_string, string_from_duration, reverse_dict, generate_fields_for_timeline
 from awa.iplan._initial_setup import *
-
+from datetime import date
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -27,15 +27,20 @@ def task():
 def task_create():
     form_task = TaskForm()
     # Dynamic choices
-    form_task.strategy.choices = [(item.id, item.name) for item in Strategy.query.order_by(Strategy.order).all()]
+    form_task.id_strategy.choices = [(item.id, item.name) for item in Strategy.query.order_by(Strategy.order).all()]
+    form_task.category.choices = TASK_CATEGORY_CHOICES
+    form_task.frequency.choices = TASK_FREQUENCY_CHOICES
+    form_task.time_line.choices = generate_fields_for_timeline()
 
     if form_task.validate_on_submit():
         task = Task(name=form_task.name.data, desc=form_task.desc.data,
-                plan=duration_from_string(form_task.plan.data),
-                actual=duration_from_string(form_task.actual.data),
-                frequency=dict(form_task.frequency.choices).get(form_task.frequency.data),
-                id_strategy=form_task.strategy.data,
-                order=form_task.order.data)
+                duration_plan=duration_from_string(form_task.duration_plan.data),
+                duration_real=duration_from_string(form_task.duration_real.data),
+                category=dict(TASK_CATEGORY_CHOICES).get(form_task.category.data),
+                frequency=dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data),
+                id_strategy=form_task.id_strategy.data,
+                order=form_task.order.data,
+                time_line=date.fromordinal(form_task.time_line.data))
         db.session.add(task)
         db.session.commit()
         return redirect(url_for('iplan.task'))
@@ -49,27 +54,34 @@ def task_create():
 def task_update(id_task):
     form_task = TaskForm()
     # Dynamic choices
-    form_task.strategy.choices = [(item.id, item.name) for item in Strategy.query.all()]
+    form_task.id_strategy.choices = [(item.id, item.name) for item in Strategy.query.all()]
+    form_task.category.choices = TASK_CATEGORY_CHOICES
+    form_task.frequency.choices = TASK_FREQUENCY_CHOICES
+    form_task.time_line.choices = generate_fields_for_timeline()
 
     task = Task.query.get_or_404(id_task)
     if form_task.validate_on_submit():
         task.name = form_task.name.data
-        task.id_strategy = form_task.strategy.data
+        task.id_strategy = form_task.id_strategy.data
         task.desc = form_task.desc.data
-        task.plan = duration_from_string(form_task.plan.data)
-        task.actual = duration_from_string(form_task.actual.data)
-        task.frequency = dict(form_task.frequency.choices).get(form_task.frequency.data)
+        task.category = dict(TASK_CATEGORY_CHOICES).get(form_task.category.data)
+        task.frequency = dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data)
+        task.duration_plan = duration_from_string(form_task.duration_plan.data)
+        task.duration_real = duration_from_string(form_task.duration_real.data)
+        task.time_line = date.fromordinal(form_task.time_line.data)
         task.order = form_task.order.data
         db.session.commit()
         return redirect(url_for('iplan.task'))
     elif request.method == 'GET':
         form_task.name.data = task.name
-        form_task.strategy.data = task.id_strategy
+        form_task.id_strategy.data = task.id_strategy
         form_task.desc.data = task.desc
-        form_task.plan.data = string_from_duration(task.plan)
-        form_task.actual.data = string_from_duration(task.actual)
-        form_task.frequency.data = reverse_dict(form_task.frequency.choices).get(task.frequency, 1)
+        form_task.category.data = reverse_dict(TASK_CATEGORY_CHOICES).get(task.category, 1)
+        form_task.frequency.data = reverse_dict(TASK_FREQUENCY_CHOICES).get(task.frequency, 1)
+        form_task.duration_plan.data = string_from_duration(task.duration_plan)
+        form_task.duration_real.data = string_from_duration(task.duration_real)
         form_task.order.data = task.order
+        form_task.time_line.data = task.time_line.toordinal()
         form_task.submit.label.text = 'Update task'
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task')
 
