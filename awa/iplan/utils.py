@@ -72,8 +72,8 @@ def string_from_duration(x):
     """ Converts datatime.timedelta into string
     Function is used to update plan and actual of task model
     """
-    if x is None:
-        return timedelta(0)
+    if x is None or x.total_seconds() == 0:
+        return '0h 0m'
 
     total_seconds = x.total_seconds()
     days = total_seconds // 86400
@@ -83,4 +83,9 @@ def string_from_duration(x):
     minutes = total_seconds // 60
     total_seconds -= minutes * 60
     seconds = total_seconds
-    return f'{int(days)}d {int(hours)}h {int(minutes)}m {int(seconds)}s'
+
+    outcome = ''
+    for item in [(days, 'd'), (hours, 'h'), (minutes, 'm'), (seconds, 's')]:
+        if item[0] != 0:
+            outcome += f'{int(item[0])}{item[1]} '
+    return outcome[:-1]

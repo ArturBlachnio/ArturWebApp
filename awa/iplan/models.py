@@ -16,7 +16,7 @@ class Strategy(db.Model):
     desc = db.Column(db.Text)
     color = db.Column(db.String(7))
     order = db.Column(db.Integer)
-    time_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    time_creation = db.Column(db.DateTime, default=datetime.now)
     time_completion = db.Column(db.DateTime)
     category = db.Column(db.String(20), nullable=True)
     br_task = db.relationship('Task', backref='strategy')  # todo: lazy=True - test that later
@@ -46,21 +46,14 @@ class Task(db.Model):
     duration_plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
     duration_real = db.Column(db.Interval, nullable=False, default=timedelta(0))
     timer_start = db.Column(db.DateTime)
-    timer_end = db.Column(db.DateTime)
     order = db.Column(db.Integer)
     id_strategy = db.Column(db.Integer, db.ForeignKey('strategy.id'), nullable=False)
     id_project = db.Column(db.Integer, db.ForeignKey('project.id'))
-
-    # plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
-    # actual = db.Column(db.Interval, nullable=False, default=timedelta(0))
-    # start = db.Column(db.DateTime)
-    # end = db.Column(db.DateTime)
-    # complete = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         return f"Task(id='{self.id}', name='{self.name}', desc='{self.desc}', category='{self.category}', " \
                f"frequency='{self.frequency}', time_creation='{self.time_creation}', " \
                f"time_completion='{self.time_completion}', time_line='{self.time_line}', " \
                f"duration_plan='{self.duration_plan}', duration_real='{self.duration_real}', " \
-               f"timer_start='{self.timer_start}', timer_end='{self.timer_end}', order='{self.order}', " \
+               f"timer_start='{self.timer_start}', order='{self.order}', " \
                f"id_strategy='{self.id_strategy}', id_project='{self.id_project}')"

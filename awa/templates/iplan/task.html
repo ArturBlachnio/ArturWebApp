@@ -5,12 +5,30 @@
         {% for task in tasks %}
         <div class="row">
             <div class="col-6 rounded-left mt-1 mb-1" style="background-color:{{task.strategy.color}}">
-                {{task.name}}
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small>{{task.name}}</small>
+                    </div>
+                    <div class="col-auto ml-auto">
+                        {% if task.timer_start %}
+                            <a href="{{url_for('iplan.task_timer_start', id_task=task.id) }}" class="badge badge-light">Reset</a>
+                            <a href="{{url_for('iplan.task_timer_end', id_task=task.id) }}" class="badge badge-danger">Stop</a>
+                        {% else %}
+                            <a href="{{url_for('iplan.task_timer_start', id_task=task.id) }}" class="badge badge-light">Start</a>
+                            <a href="{{url_for('iplan.task_complete', id_task=task.id)}}" class="badge badge-success">Done</a>
+                        {% endif%}
+                    </div>
+                </div>
             </div>
             <div class="col border rounded-right mt-1 mb-1">
                 <div class="row p-0">
                     <div class="col-auto">
-                        <small>id={{task.id}}, freq={{task.frequency}}, order={{task.order}}</small>
+                        <small>{{testfunc}} id{{task.id}}</small>
+                        {% if task.timer_start %}
+                        <small class="badge badge-warning">{{string_from_duration(now - task.timer_start)}}</small>
+                        {% endif %}
+                        <small class="badge badge-info">{{string_from_duration(task.duration_real)}}</small>
+                        <small class="badge badge-info">{{string_from_duration(task.duration_plan)}}</small>
                     </div>
                     <div class="col-auto ml-auto">
                         <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary">Update</a>

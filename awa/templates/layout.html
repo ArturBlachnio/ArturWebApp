@@ -36,7 +36,9 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="navbar-nav mr-auto">
                         <a class="nav-item nav-link" href="{{ url_for('iplan.home') }}">iPlan</a>
-                        <a class="nav-item nav-link" href="{{ url_for('iplan.task') }}">Tasks</a>
+                        <a class="nav-item nav-link" href="{{ url_for('iplan.task') }}">AllTasks</a>
+                        <a class="nav-item nav-link" href="{{ url_for('iplan.task_open') }}">OpenTasks</a>
+                        <a class="nav-item nav-link" href="{{ url_for('iplan.task_completed') }}">ClosedTasks</a>
                         <a class="nav-item nav-link" href="{{ url_for('iplan.task_create') }}">NewTask</a>
                         <a class="nav-item nav-link" href="{{ url_for('iplan.strategy') }}">Strategies</a>
                         <a class="nav-item nav-link" href="{{ url_for('iplan.strategy_create') }}">NewStrategy</a>

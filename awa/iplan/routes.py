@@ -4,7 +4,7 @@ from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan.utils import duration_from_string, string_from_duration, reverse_dict, generate_fields_for_timeline
 from awa.iplan._initial_setup import *
-from datetime import date
+from datetime import date, timedelta
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -20,7 +20,24 @@ def home():
 def task():
     tasks = Task.query.order_by(Task.order).all()
     strategies = Strategy.query.all()
-    return render_template('iplan/task.html', tasks=tasks, strategies=strategies)
+    return render_template('iplan/task.html', tasks=tasks, strategies=strategies,
+                           string_from_duration=string_from_duration, now=datetime.now())
+
+
+@iplan.route('/iplan/task/completed', methods=['GET', 'POST'])
+def task_completed():
+    tasks = Task.query.filter(Task.time_completion.isnot(None)).order_by(Task.order).all()
+    strategies = Strategy.query.all()
+    return render_template('iplan/task.html', tasks=tasks, strategies=strategies,
+                           string_from_duration=string_from_duration, now=datetime.now())
+
+
+@iplan.route('/iplan/task/open', methods=['GET', 'POST'])
+def task_open():
+    tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
+    strategies = Strategy.query.all()
+    return render_template('iplan/task.html', tasks=tasks, strategies=strategies,
+                           string_from_duration=string_from_duration, now=datetime.now())
 
 
 @iplan.route('/iplan/task/create', methods=['GET', 'POST'])
@@ -84,6 +101,43 @@ def task_update(id_task):
         form_task.time_line.data = task.time_line.toordinal()
         form_task.submit.label.text = 'Update task'
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task')
+
+
+@iplan.route('/iplan/task/complete/<id_task>', methods=['GET', 'POST'])
+def task_complete(id_task):
+    task = Task.query.get_or_404(id_task)
+    task.time_completion = datetime.now()
+    # Add new task if task was repeatable
+    if task.frequency == 'Continues':
+        new_task = Task(name=task.name, desc=task.desc,
+                duration_plan=task.duration_plan, duration_real=timedelta(0),
+                category=task.category, frequency=task.frequency,
+                id_strategy=task.id_strategy, order=task.order,
+                time_line=task.time_line)
+        db.session.add(new_task)
+        flash('Task completed. New task created.', 'success')
+    else:
+        flash('Task completed.', 'success')
+    db.session.commit()
+    return redirect(url_for('iplan.task'))
+
+
+@iplan.route('/iplan/task/timer_start/<id_task>')
+def task_timer_start(id_task):
+    task = Task.query.get_or_404(id_task)
+    task.timer_start = datetime.now()
+    db.session.commit()
+    return redirect(url_for('iplan.task'))
+
+
+@iplan.route('/iplan/task/timer_end/<id_task>')
+def task_timer_end(id_task):
+    task = Task.query.get_or_404(id_task)
+    task.duration_real += datetime.now() - task.timer_start
+    task.timer_start = None
+    # todo remove timer_end from database - its not needed
+    db.session.commit()
+    return redirect(url_for('iplan.task'))
 
 
 @iplan.route('/iplan/task/delete/<id_task>', methods=['GET', 'POST'])
@@ -171,3 +225,4 @@ def strategy_delete(id_strategy):
 # todo - strategy: when tasks are there - add to route strategy_update nr of task
 # todo - strategy: when tasks are there - add to strategy.html on delete button nr tasks
 # todo - color picker with bootstrap and JS (it's available on net)
+# todo - Far Future change time to utc level. Currently it's local time only
