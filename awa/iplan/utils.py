@@ -89,3 +89,39 @@ def string_from_duration(x):
         if item[0] != 0:
             outcome += f'{int(item[0])}{item[1]} '
     return outcome[:-1]
+
+
+def reorder_tasks(direction, task_id, current_order_of_ids):
+    """ Takes current task id and ids of all other tasks (in scope) and returns dict or id and new order
+    If task_id not in list, returns same order_of_list
+    Directions can be:
+    up - move one position up
+    down - move one position down
+    top - move to the beginning
+    bottom - move to the end
+    """
+    if task_id not in current_order_of_ids:
+        return current_order_of_ids
+
+    task_index = current_order_of_ids.index(task_id)
+
+    new_order = current_order_of_ids.copy()
+    new_order.pop(task_index)
+
+    if direction == 'up':
+        # If gets to -1 it's getting from end of list
+        new_order.insert(max(0, task_index - 1), task_id)
+    elif direction == 'down':
+        # Can not get higher than lenght of list
+        new_order.insert(min((len(new_order)), task_index + 1), task_id)
+    elif direction == 'top':
+        new_order.insert(0, task_id)
+    elif direction == 'bottom':
+        new_order.insert(len(new_order), task_id)
+    else:
+        new_order.insert(task_index, task_id)
+
+    outcome_order = []
+    for i in current_order_of_ids:
+        outcome_order.append(new_order.index(i))
+    return outcome_order

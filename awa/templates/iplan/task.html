@@ -15,7 +15,15 @@
                             <a href="{{url_for('iplan.task_timer_end', id_task=task.id) }}" class="badge badge-danger">Stop</a>
                         {% else %}
                             <a href="{{url_for('iplan.task_timer_start', id_task=task.id) }}" class="badge badge-light">Start</a>
-                            <a href="{{url_for('iplan.task_complete', id_task=task.id)}}" class="badge badge-success">Done</a>
+                            {% if task.time_completion %}
+                                <a href="{{url_for('iplan.task_restore', id_task=task.id)}}" class="badge badge-primary">Restore</a>
+                            {% else %}
+                                {% if task.frequency == 'OneTime' %}
+                                    <a href="{{url_for('iplan.task_complete', id_task=task.id)}}" class="badge badge-success">Done</a>
+                                {% else %}
+                                    <a href="{{url_for('iplan.task_complete', id_task=task.id)}}" class="badge badge-success">Done+</a>
+                                {% endif %}
+                            {% endif %}
                         {% endif%}
                     </div>
                 </div>
@@ -23,16 +31,22 @@
             <div class="col border rounded-right mt-1 mb-1">
                 <div class="row p-0">
                     <div class="col-auto">
-                        <small>{{testfunc}} id{{task.id}}</small>
+                        <small>id{{task.id}}</small>
                         {% if task.timer_start %}
                         <small class="badge badge-warning">{{string_from_duration(now - task.timer_start)}}</small>
                         {% endif %}
                         <small class="badge badge-info">{{string_from_duration(task.duration_real)}}</small>
-                        <small class="badge badge-info">{{string_from_duration(task.duration_plan)}}</small>
+                        <small class="badge badge-light">{{string_from_duration(task.duration_plan)}}</small>
+                        {{task.order}}
                     </div>
                     <div class="col-auto ml-auto">
                         <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary">Update</a>
+                        <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up') }}" class="badge badge-dark">Up</a>
+                        <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top') }}" class="badge badge-dark">Top</a>
+                        <br>
                         <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-danger">Delete</a>
+                        <a href="{{url_for('iplan.task_move', id_task=task.id, direction='down') }}" class="badge badge-dark">Down</a>
+                        <a href="{{url_for('iplan.task_move', id_task=task.id, direction='bottom') }}" class="badge badge-dark">Bottom</a>
                     </div>
                 </div>
             </div>

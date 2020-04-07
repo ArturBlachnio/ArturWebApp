@@ -83,7 +83,8 @@
                         {{ form_task.frequency(class="form-control form-control-sm text-primary", placeholder='Description') }}
                     {% endif %}
                 </div>
-                </div>                <div class="form-group">
+                </div>
+                <div class="form-group">
                     {{ form_task.duration_plan.label(class="form-control-label text-info") }}
                     {% if form_task.duration_plan.errors %}
                         {{ form_task.duration_plan(class="form-control form-control-sm is-invalid") }}
@@ -119,7 +120,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.order(class="form-control form-control-sm text-primary", placeholder='999')}}
+                        {{ form_task.order(class="form-control form-control-sm text-primary", placeholder='0')}}
                     {% endif %}
                 </div>
             </fieldset>

@@ -2,9 +2,11 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request
 from awa import db
 from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
-from awa.iplan.utils import duration_from_string, string_from_duration, reverse_dict, generate_fields_for_timeline
 from awa.iplan._initial_setup import *
 from datetime import date, timedelta
+from awa.iplan.utils import (duration_from_string, string_from_duration, reverse_dict, generate_fields_for_timeline,
+                             reorder_tasks)
+
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -60,9 +62,9 @@ def task_create():
                 time_line=date.fromordinal(form_task.time_line.data))
         db.session.add(task)
         db.session.commit()
-        return redirect(url_for('iplan.task'))
+        return redirect(url_for('iplan.task_open'))
     elif request.method == 'GET':
-        form_task.order.data = 999
+        form_task.order.data = 0
         form_task.submit.label.text = 'Create task'
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Create New Task')
 
@@ -88,7 +90,7 @@ def task_update(id_task):
         task.time_line = date.fromordinal(form_task.time_line.data)
         task.order = form_task.order.data
         db.session.commit()
-        return redirect(url_for('iplan.task'))
+        return redirect(url_for('iplan.task_open'))
     elif request.method == 'GET':
         form_task.name.data = task.name
         form_task.id_strategy.data = task.id_strategy
@@ -113,13 +115,33 @@ def task_complete(id_task):
                 duration_plan=task.duration_plan, duration_real=timedelta(0),
                 category=task.category, frequency=task.frequency,
                 id_strategy=task.id_strategy, order=task.order,
-                time_line=task.time_line)
+                time_line=task.time_line + timedelta(days=1))
         db.session.add(new_task)
-        flash('Task completed. New task created.', 'success')
+        flash('Task completed. New task created and move on next day.', 'success')
     else:
         flash('Task completed.', 'success')
     db.session.commit()
-    return redirect(url_for('iplan.task'))
+    return redirect(url_for('iplan.task_open'))
+
+
+@iplan.route('/iplan/task/restore/<id_task>', methods=['GET', 'POST'])
+def task_restore(id_task):
+    task = Task.query.get_or_404(id_task)
+    task.time_completion = None
+    flash('Task restored.', 'success')
+    db.session.commit()
+    return redirect(url_for('iplan.task_open'))
+
+
+@iplan.route('/iplan/task/move_<direction>/<id_task>', methods=['GET', 'POST'])
+def task_move(id_task, direction):
+    task = Task.query.get_or_404(id_task)
+    tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
+    new_orders_of_ids = reorder_tasks(direction=direction, task_id=task.id, current_order_of_ids=[task.id for task in tasks])
+    for i, task in enumerate(tasks):
+        task.order = new_orders_of_ids[i]
+    db.session.commit()
+    return redirect(url_for('iplan.task_open'))
 
 
 @iplan.route('/iplan/task/timer_start/<id_task>')
@@ -127,7 +149,7 @@ def task_timer_start(id_task):
     task = Task.query.get_or_404(id_task)
     task.timer_start = datetime.now()
     db.session.commit()
-    return redirect(url_for('iplan.task'))
+    return redirect(url_for('iplan.task_open'))
 
 
 @iplan.route('/iplan/task/timer_end/<id_task>')
@@ -137,7 +159,7 @@ def task_timer_end(id_task):
     task.timer_start = None
     # todo remove timer_end from database - its not needed
     db.session.commit()
-    return redirect(url_for('iplan.task'))
+    return redirect(url_for('iplan.task_open'))
 
 
 @iplan.route('/iplan/task/delete/<id_task>', methods=['GET', 'POST'])
@@ -146,7 +168,7 @@ def task_delete(id_task):
     db.session.delete(task)
     db.session.commit()
     flash('Task has been deleted', 'success')
-    return redirect(url_for('iplan.task'))
+    return redirect(url_for('iplan.task_open'))
 
 
 @iplan.route('/iplan/strategy', methods=['GET', 'POST'])
@@ -172,7 +194,7 @@ def strategy_create():
         flash('New strategy has been created.', 'success')
         return redirect(url_for('iplan.strategy'))
     elif request.method == 'GET':
-        form.order.data = 999
+        form.order.data = 0
         form.color.data = 'LightSteelBlue'
     return render_template('iplan/strategy_edit.html', form=form, legend='Create New Strategy')
 
