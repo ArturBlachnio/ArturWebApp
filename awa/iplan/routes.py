@@ -130,7 +130,7 @@ def task_restore(id_task):
     task.time_completion = None
     flash('Task restored.', 'success')
     db.session.commit()
-    return redirect(url_for('iplan.task_open'))
+    return redirect(request.referrer)
 
 
 @iplan.route('/iplan/task/move_<direction>/<id_task>', methods=['GET', 'POST'])
@@ -168,7 +168,7 @@ def task_delete(id_task):
     db.session.delete(task)
     db.session.commit()
     flash('Task has been deleted', 'success')
-    return redirect(url_for('iplan.task_open'))
+    return redirect(request.referrer)
 
 
 @iplan.route('/iplan/strategy', methods=['GET', 'POST'])

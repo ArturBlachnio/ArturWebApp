@@ -17,7 +17,7 @@ def generate_fields_for_timeline(_testing_days_up=0):
     today = date.today() + timedelta(days=_testing_days_up)
     _today = (today, 'Today')
     _tomorrow = (today + timedelta(days=1), 'Tomorrow')
-    _in2days = (today + timedelta(days=2), 'In two days')
+    _in2days = (today + timedelta(days=2), f'On {(today + timedelta(days=2)).strftime("%A")}')
 
     # _nextweek must be at least 1day later then _in2days
     _nextweek = (today + timedelta(days=8-today.isoweekday()), 'Next week')
