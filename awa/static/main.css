@@ -6,10 +6,10 @@ body {
 
 .content-section {
   background: #ffffff;
-  padding: 10px 20px;
+  padding: 5px 5px;
   border: 1px solid #dddddd;
   border-radius: 3px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .art_border_rad{
@@ -21,4 +21,19 @@ body {
 .art_table{
     margin: 0px;
     font-size: 0.7rem;
+}
+
+.timeline_header{
+    font-size: 10px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.timeline_task_name {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.timeline_task_buttons {
+    font-size: 14px;
 }

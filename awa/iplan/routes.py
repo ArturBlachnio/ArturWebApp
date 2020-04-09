@@ -4,9 +4,8 @@ from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan._initial_setup import *
 from datetime import date, timedelta
-from awa.iplan.utils import (duration_from_string, string_from_duration, reverse_dict, generate_fields_for_timeline,
-                             reorder_tasks)
-
+from awa.iplan.utils import (duration_from_string, string_from_duration, reverse_dict, reorder_tasks,
+                             generate_fields_for_timeline, timeline_ranges)
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -16,6 +15,14 @@ def home():
     tasks = Task.query.all()
     strategies = Strategy.query.all()
     return render_template('iplan/home.html', tasks=tasks, strategies=strategies)
+
+
+@iplan.route('/iplan/timeline', methods=['GET', 'POST'])
+def timeline():
+    tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
+    strategies = Strategy.query.order_by(Strategy.order).all()
+    return render_template('iplan/timeline.html', tasks=tasks, strategies=strategies, string_from_duration=string_from_duration,
+                           now=datetime.now(), fromordinal=datetime.fromordinal, timeline_ranges=timeline_ranges)
 
 
 @iplan.route('/iplan/task', methods=['GET', 'POST'])
@@ -62,7 +69,7 @@ def task_create():
                 time_line=date.fromordinal(form_task.time_line.data))
         db.session.add(task)
         db.session.commit()
-        return redirect(url_for('iplan.task_open'))
+        return redirect(url_for('iplan.timeline'))
     elif request.method == 'GET':
         form_task.order.data = 0
         form_task.submit.label.text = 'Create task'
@@ -90,7 +97,7 @@ def task_update(id_task):
         task.time_line = date.fromordinal(form_task.time_line.data)
         task.order = form_task.order.data
         db.session.commit()
-        return redirect(url_for('iplan.task_open'))
+        return redirect(url_for('iplan.timeline'))
     elif request.method == 'GET':
         form_task.name.data = task.name
         form_task.id_strategy.data = task.id_strategy
@@ -121,7 +128,7 @@ def task_complete(id_task):
     else:
         flash('Task completed.', 'success')
     db.session.commit()
-    return redirect(url_for('iplan.task_open'))
+    return redirect(url_for('iplan.timeline'))
 
 
 @iplan.route('/iplan/task/restore/<id_task>', methods=['GET', 'POST'])
@@ -149,7 +156,7 @@ def task_timer_start(id_task):
     task = Task.query.get_or_404(id_task)
     task.timer_start = datetime.now()
     db.session.commit()
-    return redirect(url_for('iplan.task_open'))
+    return redirect(request.referrer)
 
 
 @iplan.route('/iplan/task/timer_end/<id_task>')
@@ -159,7 +166,7 @@ def task_timer_end(id_task):
     task.timer_start = None
     # todo remove timer_end from database - its not needed
     db.session.commit()
-    return redirect(url_for('iplan.task_open'))
+    return redirect(request.referrer)
 
 
 @iplan.route('/iplan/task/delete/<id_task>', methods=['GET', 'POST'])

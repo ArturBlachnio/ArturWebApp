@@ -36,6 +36,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="navbar-nav mr-auto">
                         <a class="nav-item nav-link" href="{{ url_for('iplan.home') }}">iPlan</a>
+                        <a class="nav-item nav-link" href="{{ url_for('iplan.timeline') }}">Timeline</a>
                         <a class="nav-item nav-link" href="{{ url_for('iplan.task') }}">AllTasks</a>
                         <a class="nav-item nav-link" href="{{ url_for('iplan.task_open') }}">OpenTasks</a>
                         <a class="nav-item nav-link" href="{{ url_for('iplan.task_completed') }}">ClosedTasks</a>
@@ -55,15 +56,7 @@
     </header>
 
     <!-- Main body content -->
-    <main role="main" class="container">
-      <div class="row">
-        <div class="col-md-8">
-            <!-- Content -->
-            {% block content %}{% endblock %}
-        </div>
-          <!-- Sidebar -->
-        <div class="col-md-4">
-        <!-- Flash -->
+    <main role="main">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -73,18 +66,8 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
-          <div class="content-section">
-            <h3>Our Sidebar</h3>
-            <p class='text-muted'>You can put any information.
-              <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Placeholder 1</li>
-                <li class="list-group-item list-group-item-light">Placeholder 2</li>
-                <li class="list-group-item list-group-item-light">Placeholder 3</li>
-              </ul>
-            </p>
-          </div>
-        </div>
-      </div>
+            <!-- Content -->
+            {% block content %}{% endblock %}
     </main>
 
     <!-- Optional JavaScript | src: from bootstrap starter page -->

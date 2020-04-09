@@ -45,6 +45,16 @@ def generate_fields_for_timeline(_testing_days_up=0):
     ordinal_choices = [(item[0].toordinal(), item[1]) for item in choices]
     return ordinal_choices
 
+
+def timeline_ranges(_testing_days_up=0):
+    a = [(date(year=1970, month=1, day=1).toordinal(), 'Today')]
+    a.extend(generate_fields_for_timeline(_testing_days_up)[1:])
+    a.append(((date(year=date.today().year+1000, month=1, day=1)-timedelta(days=1)).toordinal(), '100 years from now'))
+    ranges = []
+    for i in range(len(a)-1):
+        ranges.append((a[i][0], a[i+1][0], a[i][1]))
+    return ranges
+
 # for i in range(270, 275):
 #     print(i)
 #     generate_fields_for_timeline(i)
