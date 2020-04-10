@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime, date
 import re
-
+from awa.iplan._initial_setup import LATER_HRS, DISPLAY_EVENING_TILL_HOUR, DISPLAY_LATER_TILL_HOUR
 
 def reverse_dict(x):
     """ Applied for SelectField choices in updating forms
@@ -9,13 +9,19 @@ def reverse_dict(x):
     return {v: k for (k, v) in dict(x).items()}
 
 
-def generate_fields_for_timeline(_testing_days_up=0):
+def generate_fields_for_timeline(_testing_days_up=0, LATER_HRS=LATER_HRS):
     """ Returns choices for time_line SelectField.
     Shape: [(datetime1, category1), (datetimeN, categoryN)]
     """
-    categories = ['Today', 'Tomorrow', 'In two days', 'Next week', 'Next month', 'This year', 'Unspecified']
-    today = date.today() + timedelta(days=_testing_days_up)
-    _today = (today, 'Today')
+    today = datetime.fromordinal(date.today().toordinal()) + timedelta(days=_testing_days_up)
+    _now = datetime.now()
+    _today = (today, 'Now')
+
+    # LATER_HRS after 20.00 will be adjusted to not go for next day (e.g. if it's 22.00 it will be 23.59)
+    if 24 - LATER_HRS <= _now.hour:
+        LATER_HRS = 24 - _now.hour - 1
+    _later = (datetime(year=_now.year, month=_now.month, day=_now.day, hour=_now.hour) + timedelta(hours=LATER_HRS), f'Later (+{LATER_HRS}h)')
+    _evening = (today + timedelta(hours=20), 'In the evening')
     _tomorrow = (today + timedelta(days=1), 'Tomorrow')
     _in2days = (today + timedelta(days=2), f'On {(today + timedelta(days=2)).strftime("%A")}')
 
@@ -26,34 +32,90 @@ def generate_fields_for_timeline(_testing_days_up=0):
 
     # _nextmonth must be at least in next month counting from _nextweek
     if today.month == 12:
-        _nextmonth = (date(year=today.year+1, month=1, day=1), 'Next month')
+        _nextmonth = (datetime(year=today.year+1, month=1, day=1), 'Next month')
     else:
-        _nextmonth = (date(year=today.year, month=today.month+1, day=1), 'Next month')
+        _nextmonth = (datetime(year=today.year, month=today.month+1, day=1), 'Next month')
     if _nextmonth[0] <= _nextweek[0]:
         if today.month == 12:
-            _nextmonth = (date(year=today.year + 1, month=2, day=1), _nextmonth[1])
+            _nextmonth = (datetime(year=today.year + 1, month=2, day=1), _nextmonth[1])
         else:
-            _nextmonth = (date(year=today.year, month=today.month+2, day=1), _nextmonth[1])
+            _nextmonth = (datetime(year=today.year, month=today.month+2, day=1), _nextmonth[1])
 
     # _thisyear - last day in this year
-    _thisyear = (date(year=today.year+1, month=1, day=1)-timedelta(days=1), 'This year')
+    _thisyear = (datetime(year=today.year+1, month=1, day=1)-timedelta(days=1), 'This year')
 
     # _nextyear - last day in this year
-    _nextyear = (date(year=today.year+2, month=1, day=1)-timedelta(days=1), 'Next year')
+    _nextyear = (datetime(year=today.year+2, month=1, day=1)-timedelta(days=1), 'Next year')
 
-    choices = [_today, _tomorrow, _in2days, _nextweek, _nextmonth, _thisyear, _nextyear]
-    ordinal_choices = [(item[0].toordinal(), item[1]) for item in choices]
+    choices = [_today, _later, _evening, _tomorrow, _in2days, _nextweek, _nextmonth, _thisyear, _nextyear]
+    # Do not display _later and _evening choices if they are not displayed anymote (in function timeline_ranges)
+    if datetime.now().hour > DISPLAY_LATER_TILL_HOUR:
+        choices.remove(_later)
+    if datetime.now().hour > DISPLAY_EVENING_TILL_HOUR:
+        choices.remove(_evening)
+    ordinal_choices = [(int(item[0].timestamp()), item[1]) for item in choices]
     return ordinal_choices
+
+# for item in generate_fields_for_timeline():
+#     print(item, datetime.fromtimestamp(item[0]))
 
 
 def timeline_ranges(_testing_days_up=0):
-    a = [(date(year=1970, month=1, day=1).toordinal(), 'Today')]
+    """ Used in timeline.html. Displays timeline divs and checks if task belongs to category. """
+    a = [(int(datetime(year=1980, month=1, day=1).timestamp()), 'Now')]
     a.extend(generate_fields_for_timeline(_testing_days_up)[1:])
-    a.append(((date(year=date.today().year+1000, month=1, day=1)-timedelta(days=1)).toordinal(), '100 years from now'))
+    a.append((int(datetime(year=date.today().year+100, month=1, day=1).timestamp()), '100 years from now'))
+    # Between _now & _later: replace 'till moment'  with datetime.now()
+    # Do not display at all after 19:00
+    if datetime.now().hour < DISPLAY_LATER_TILL_HOUR:
+        a[1] = (int((datetime.now()).timestamp()), a[1][1])
+    else:
+        for i, item in enumerate(a):
+            if item[1] == f'Later (+{LATER_HRS}h)':
+                a.pop(i)
+                break
+
+    # Between _later & _evening: replace 'till moment'  with max(datetime.now() & 20:00).
+    # Do not display at all after 20:00
+    if datetime.now().hour < DISPLAY_EVENING_TILL_HOUR:
+        a[2] = (max(a[2][0], int((datetime.now()).timestamp())), a[2][1])
+    else:
+        for i, item in enumerate(a):
+            if item[1] == 'In the evening':
+                a.pop(i)
+                break
+    # Make from-to-name tuples
     ranges = []
     for i in range(len(a)-1):
         ranges.append((a[i][0], a[i+1][0], a[i][1]))
     return ranges
+
+
+def get_moment_in_timeline(current_timeline, direction='next'):
+    """ Returns task new position (as datetime) on timeline depending on direction (right: next, left: previous).
+    """
+    # Get index of current timeline
+    index_timeline = 0
+    for i, time_range in enumerate(timeline_ranges()):
+        if current_timeline.timestamp() >= time_range[0] and current_timeline.timestamp() < time_range[1]:
+            index_timeline = i
+            break
+
+    index_next = min(index_timeline + 1, len(timeline_ranges())-1)
+    index_prev = max(index_timeline - 1, 0)
+
+    # For testing
+    # print('current:', index_timeline, datetime.fromtimestamp(timeline_ranges()[index_timeline][0]), datetime.fromtimestamp(timeline_ranges()[index_timeline][1]))
+    # print('next:', index_next, datetime.fromtimestamp(timeline_ranges()[index_next][0]), datetime.fromtimestamp(timeline_ranges()[index_next][1]))
+    # print('prev:', index_prev, datetime.fromtimestamp(timeline_ranges()[index_prev][0]), datetime.fromtimestamp(timeline_ranges()[index_prev][1]))
+
+    # Return last possible time minus 1 minute
+    if direction == 'next':
+        return datetime.fromtimestamp(timeline_ranges()[index_next][1]) - timedelta(minutes=1)
+    elif direction == 'previous':
+        return datetime.fromtimestamp(timeline_ranges()[index_prev][1]) - timedelta(minutes=1)
+    else:
+        return datetime.now()
 
 # for i in range(270, 275):
 #     print(i)
@@ -94,8 +156,19 @@ def string_from_duration(x):
     total_seconds -= minutes * 60
     seconds = total_seconds
 
+    # Compact display: if nb of none-zero items > 2 than drop seconds.
+    duration_items = [(days, 'd'), (hours, 'h'), (minutes, 'm'), (seconds, 's')]
+    non_zero_items = 0
+    for item in duration_items:
+        if item[0] != 0:
+            non_zero_items += 1
+
+    if non_zero_items > 2:
+        duration_items.pop(-1)
+
+    # Final output
     outcome = ''
-    for item in [(days, 'd'), (hours, 'h'), (minutes, 'm'), (seconds, 's')]:
+    for item in duration_items:
         if item[0] != 0:
             outcome += f'{int(item[0])}{item[1]} '
     return outcome[:-1]

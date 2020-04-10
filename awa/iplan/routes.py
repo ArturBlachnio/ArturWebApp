@@ -5,7 +5,7 @@ from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan._initial_setup import *
 from datetime import date, timedelta
 from awa.iplan.utils import (duration_from_string, string_from_duration, reverse_dict, reorder_tasks,
-                             generate_fields_for_timeline, timeline_ranges)
+                             generate_fields_for_timeline, timeline_ranges, get_moment_in_timeline)
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -22,7 +22,7 @@ def timeline():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
     strategies = Strategy.query.order_by(Strategy.order).all()
     return render_template('iplan/timeline.html', tasks=tasks, strategies=strategies, string_from_duration=string_from_duration,
-                           now=datetime.now(), fromordinal=datetime.fromordinal, timeline_ranges=timeline_ranges)
+                           now=datetime.now(), fromtimestamp=datetime.fromtimestamp, timeline_ranges=timeline_ranges)
 
 
 @iplan.route('/iplan/task', methods=['GET', 'POST'])
@@ -57,7 +57,6 @@ def task_create():
     form_task.category.choices = TASK_CATEGORY_CHOICES
     form_task.frequency.choices = TASK_FREQUENCY_CHOICES
     form_task.time_line.choices = generate_fields_for_timeline()
-
     if form_task.validate_on_submit():
         task = Task(name=form_task.name.data, desc=form_task.desc.data,
                 duration_plan=duration_from_string(form_task.duration_plan.data),
@@ -66,7 +65,7 @@ def task_create():
                 frequency=dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data),
                 id_strategy=form_task.id_strategy.data,
                 order=form_task.order.data,
-                time_line=date.fromordinal(form_task.time_line.data))
+                time_line=datetime.fromtimestamp(form_task.time_line.data))
         db.session.add(task)
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -94,7 +93,7 @@ def task_update(id_task):
         task.frequency = dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data)
         task.duration_plan = duration_from_string(form_task.duration_plan.data)
         task.duration_real = duration_from_string(form_task.duration_real.data)
-        task.time_line = date.fromordinal(form_task.time_line.data)
+        task.time_line = datetime.fromtimestamp(form_task.time_line.data)
         task.order = form_task.order.data
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -107,9 +106,9 @@ def task_update(id_task):
         form_task.duration_plan.data = string_from_duration(task.duration_plan)
         form_task.duration_real.data = string_from_duration(task.duration_real)
         form_task.order.data = task.order
-        form_task.time_line.data = task.time_line.toordinal()
+        form_task.time_line.data = task.time_line.timestamp()
         form_task.submit.label.text = 'Update task'
-    return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task')
+    return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task', choices=form_task.time_line.choices)
 
 
 @iplan.route('/iplan/task/complete/<id_task>', methods=['GET', 'POST'])
@@ -150,6 +149,16 @@ def task_move(id_task, direction):
     db.session.commit()
     return redirect(url_for('iplan.task_open'))
 
+
+@iplan.route('/iplan/task/move_timeline_<direction>/<id_task>', methods=['GET', 'POST'])
+def task_move_timeline(id_task, direction):
+    task = Task.query.get_or_404(id_task)
+    task.time_line = get_moment_in_timeline(current_timeline=task.time_line, direction=direction)
+    db.session.commit()
+    return redirect(url_for('iplan.timeline'))
+
+
+# 'iplan.task_timeline_move', id_task=task.id, direction='right')
 
 @iplan.route('/iplan/task/timer_start/<id_task>')
 def task_timer_start(id_task):

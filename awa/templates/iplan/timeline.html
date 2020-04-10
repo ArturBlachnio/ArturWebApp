@@ -5,9 +5,10 @@
         {% for timeline in timeline_ranges()%}
         <div class="col-md-4 border p-1 rounded">
             <div class="col-12 border timeline_task_border rounded p-0">
-            <small class="timeline_header">{{ timeline[2] }}</small>
+                <small class="timeline_header ml-1">{{ timeline[2] }} </small>
+                <small class="timeline_header text-muted">({{fromtimestamp(timeline[0]).strftime('%d.%m %H:%M')}} - {{fromtimestamp(timeline[1]).strftime('%d.%m %H:%M')}})</small>
                 {% for task in tasks %}
-                    {% if task.time_line >= fromordinal(timeline[0]) and task.time_line < fromordinal(timeline[1]) %}
+                    {% if task.time_line >= fromtimestamp(timeline[0]) and task.time_line < fromtimestamp(timeline[1]) %}
                         <!-- Name -->
                          <div class="row rounded-top border border-bottom-0 border-secondary timeline_task_name pl-1 pb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
                             {{task.name}}
@@ -30,12 +31,14 @@
                                     {% endif %}
                                 {% endif%}
                                 {% if task.timer_start %}
-                                <a href="#" class="badge badge-warning">{{string_from_duration(now - task.timer_start)}}</a>
+                                    <a href="#" class="badge badge-warning">{{string_from_duration(now - task.timer_start)}}</a>
                                 {% endif %}
                                 <a href="#" class="badge badge-info">{{string_from_duration(task.duration_real)}}</a>
                                 <a href="#" class="badge badge-light">{{string_from_duration(task.duration_plan)}}</a>
+                                <small class="timeline_header text-muted ml-auto">({{task.time_line.strftime('%d.%m %H:%M')}})</small>
+                                <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='previous') }}" class="badge badge-secondary"><</a>
+                                <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='next') }}" class="badge badge-secondary">></a>
                                 <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary">Update</a>
-                                <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-danger">Del</a>
                         </div>
                     {% endif %}
                 {% endfor %}
