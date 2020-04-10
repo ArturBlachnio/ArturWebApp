@@ -53,8 +53,8 @@ def generate_fields_for_timeline(_testing_days_up=0, LATER_HRS=LATER_HRS):
         choices.remove(_later)
     if datetime.now().hour > DISPLAY_EVENING_TILL_HOUR:
         choices.remove(_evening)
-    ordinal_choices = [(int(item[0].timestamp()), item[1]) for item in choices]
-    return ordinal_choices
+    timestamp_choices = [(int(item[0].timestamp()), item[1]) for item in choices]
+    return timestamp_choices
 
 # for item in generate_fields_for_timeline():
 #     print(item, datetime.fromtimestamp(item[0]))
@@ -91,15 +91,21 @@ def timeline_ranges(_testing_days_up=0):
     return ranges
 
 
-def get_moment_in_timeline(current_timeline, direction='next'):
-    """ Returns task new position (as datetime) on timeline depending on direction (right: next, left: previous).
-    """
+def get_index_in_timeline_for_current_task(current_timeline):
+    """ Returns index of (displayed) timeline. Used to order tasks."""
     # Get index of current timeline
     index_timeline = 0
     for i, time_range in enumerate(timeline_ranges()):
         if current_timeline.timestamp() >= time_range[0] and current_timeline.timestamp() < time_range[1]:
             index_timeline = i
             break
+    return index_timeline
+
+def get_moment_in_timeline(current_timeline, direction='next'):
+    """ Returns task new position (as datetime) on timeline depending on direction (right: next, left: previous).
+    """
+    # Get index of current timeline
+    index_timeline = get_index_in_timeline_for_current_task(current_timeline=current_timeline)
 
     index_next = min(index_timeline + 1, len(timeline_ranges())-1)
     index_prev = max(index_timeline - 1, 0)
@@ -205,6 +211,6 @@ def reorder_tasks(direction, task_id, current_order_of_ids):
         new_order.insert(task_index, task_id)
 
     outcome_order = []
-    for i in current_order_of_ids:
-        outcome_order.append(new_order.index(i))
+    for task_id in current_order_of_ids:
+        outcome_order.append(new_order.index(task_id))
     return outcome_order

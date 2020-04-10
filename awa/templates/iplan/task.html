@@ -42,7 +42,7 @@
                     </div>
                     <div class="col-auto ml-auto">
                         <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary">Update</a>
-                        <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up') }}" class="badge badge-dark">Up</a>
+                        <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up')}}" class="badge badge-dark">Up</a>
                         <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top') }}" class="badge badge-dark">Top</a>
                         <br>
                         <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-danger">Delete</a>

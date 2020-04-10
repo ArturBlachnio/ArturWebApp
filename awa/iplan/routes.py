@@ -5,7 +5,8 @@ from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan._initial_setup import *
 from datetime import date, timedelta
 from awa.iplan.utils import (duration_from_string, string_from_duration, reverse_dict, reorder_tasks,
-                             generate_fields_for_timeline, timeline_ranges, get_moment_in_timeline)
+                             generate_fields_for_timeline, timeline_ranges, get_moment_in_timeline,
+                             get_index_in_timeline_for_current_task)
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -22,7 +23,8 @@ def timeline():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
     strategies = Strategy.query.order_by(Strategy.order).all()
     return render_template('iplan/timeline.html', tasks=tasks, strategies=strategies, string_from_duration=string_from_duration,
-                           now=datetime.now(), fromtimestamp=datetime.fromtimestamp, timeline_ranges=timeline_ranges)
+                           now=datetime.now(), fromtimestamp=datetime.fromtimestamp, timeline_ranges=timeline_ranges,
+                           get_index_in_timeline_for_current_task=get_index_in_timeline_for_current_task)
 
 
 @iplan.route('/iplan/task', methods=['GET', 'POST'])
@@ -143,11 +145,12 @@ def task_restore(id_task):
 def task_move(id_task, direction):
     task = Task.query.get_or_404(id_task)
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
-    new_orders_of_ids = reorder_tasks(direction=direction, task_id=task.id, current_order_of_ids=[task.id for task in tasks])
+    new_orders_of_ids = reorder_tasks(direction=direction, task_id=task.id,
+                                      current_order_of_ids=[task.id for task in tasks])
     for i, task in enumerate(tasks):
-        task.order = new_orders_of_ids[i]
+        task.order = new_orders_of_ids[i] + get_index_in_timeline_for_current_task(task.time_line)*100
     db.session.commit()
-    return redirect(url_for('iplan.task_open'))
+    return redirect(url_for('iplan.timeline'))
 
 
 @iplan.route('/iplan/task/move_timeline_<direction>/<id_task>', methods=['GET', 'POST'])

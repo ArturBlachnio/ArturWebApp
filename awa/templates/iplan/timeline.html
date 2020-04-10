@@ -35,10 +35,14 @@
                                 {% endif %}
                                 <a href="#" class="badge badge-info">{{string_from_duration(task.duration_real)}}</a>
                                 <a href="#" class="badge badge-light">{{string_from_duration(task.duration_plan)}}</a>
-                                <small class="timeline_header text-muted ml-auto">({{task.time_line.strftime('%d.%m %H:%M')}})</small>
+<!--                                <small class="timeline_header text-muted ml-auto">({{task.time_line.strftime('%dd%H:%M')}})</small>-->
+                                <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary ml-auto">Edit</a>
+                                <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top')}}" class="badge badge-secondary">top</a>
+                                <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up')}}" class="badge badge-secondary">up</a>
+                                <a href="{{url_for('iplan.task_move', id_task=task.id, direction='down')}}" class="badge badge-secondary">dn</a>
+                                <a href="{{url_for('iplan.task_move', id_task=task.id, direction='bottom')}}" class="badge badge-secondary">bot</a>
                                 <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='previous') }}" class="badge badge-secondary"><</a>
                                 <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='next') }}" class="badge badge-secondary">></a>
-                                <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary">Update</a>
                         </div>
                     {% endif %}
                 {% endfor %}
