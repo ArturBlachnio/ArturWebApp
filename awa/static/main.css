@@ -32,8 +32,13 @@ body {
 .timeline_task_name {
     font-size: 12px;
     font-weight: bold;
+
 }
 
 .timeline_task_buttons {
     font-size: 14px;
+}
+
+.timeline_icons {
+    color: #333b47;
 }
