@@ -2,6 +2,11 @@ from datetime import timedelta, datetime, date
 import re
 from awa.iplan._initial_setup import LATER_HRS, DISPLAY_EVENING_TILL_HOUR, DISPLAY_LATER_TILL_HOUR
 
+"""
+timeline_category - Now, Later (+xh), in the evening,...
+timeline_timestamp - datetime.timestamps for a given timeline_category 
+"""
+
 def reverse_dict(x):
     """ Applied for SelectField choices in updating forms
     Creates dict from list of tuples [(1,a), (9,z)] -> {a:1, z:9} """
@@ -10,7 +15,7 @@ def reverse_dict(x):
 
 
 def generate_fields_for_timeline(_testing_days_up=0, LATER_HRS=LATER_HRS):
-    """ Returns choices for time_line SelectField.
+    """ Returns choices for time_due SelectField.
     Shape: [(datetime1, category1), (datetimeN, categoryN)]
     """
     today = datetime.fromordinal(date.today().toordinal()) + timedelta(days=_testing_days_up)
@@ -101,6 +106,18 @@ def get_index_in_timeline_for_current_task(current_timeline):
             break
     return index_timeline
 
+def get_timestamp_for_timeline_category(timeline_category='Now'):
+    """ Used to create New Task with preassigned timeline_category (e.g Now, Later (+4h).
+    Returns datetime.timestamp for given timeline_category as used in SelectField"""
+
+    timeline_timestamp = None
+
+    for item in generate_fields_for_timeline():
+        if item[1] == timeline_category:
+            timeline_timestamp = item[0]
+    return timeline_timestamp
+
+
 def get_moment_in_timeline(current_timeline, direction='next'):
     """ Returns task new position (as datetime) on timeline depending on direction (right: next, left: previous).
     """
@@ -181,7 +198,7 @@ def string_from_duration(x):
 
 
 def reorder_tasks(direction, task_id, current_order_of_ids):
-    """ Takes current task id and ids of all other tasks (in scope) and returns dict or id and new order
+    """ Takes current task id plus ids of all other tasks (in scope) and returns dict of id and new order
     If task_id not in list, returns same order_of_list
     Directions can be:
     up - move one position up

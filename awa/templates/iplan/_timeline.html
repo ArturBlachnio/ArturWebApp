@@ -8,7 +8,7 @@
                 <small class="timeline_header ml-1">{{ timeline[2] }} </small>
                 <small class="timeline_header text-muted">({{fromtimestamp(timeline[0]).strftime('%d.%m %H:%M')}} - {{fromtimestamp(timeline[1]).strftime('%d.%m %H:%M')}})</small>
                 {% for task in tasks %}
-                    {% if task.time_line >= fromtimestamp(timeline[0]) and task.time_line < fromtimestamp(timeline[1]) %}
+                    {% if task.time_due >= fromtimestamp(timeline[0]) and task.time_due < fromtimestamp(timeline[1]) %}
                         <!-- Name -->
                          <div class="row rounded-top border border-bottom-0 border-secondary timeline_task_name pl-1 pb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
                             {{task.name}}
@@ -35,7 +35,7 @@
                                 {% endif %}
                                 <a href="#" class="badge badge-info">{{string_from_duration(task.duration_real)}}</a>
                                 <a href="#" class="badge badge-light">{{string_from_duration(task.duration_plan)}}</a>
-<!--                                <small class="timeline_header text-muted ml-auto">({{task.time_line.strftime('%dd%H:%M')}})</small>-->
+<!--                                <small class="timeline_header text-muted ml-auto">({{task.time_due.strftime('%dd%H:%M')}})</small>-->
                                 <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary ml-auto">Edit</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top')}}" class="badge badge-secondary">top</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up')}}" class="badge badge-secondary">up</a>

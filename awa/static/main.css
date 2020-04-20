@@ -42,3 +42,15 @@ body {
 .timeline_icons {
     color: #333b47;
 }
+
+.show_menu_links {
+    color:#000;
+    font-size: 12px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.show_menu_links:hover {
+    color:#757980;
+    text-decoration:none;
+}

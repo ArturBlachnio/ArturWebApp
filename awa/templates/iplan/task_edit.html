@@ -34,16 +34,16 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form_task.time_line.label(class="form-control-label text-info text-info") }}
-                    {% if form_task.time_line.errors %}
-                        {{ form_task.time_line(class="form-control form-control-sm is-invalid") }}
+                    {{ form_task.time_due.label(class="form-control-label text-info text-info") }}
+                    {% if form_task.time_due.errors %}
+                        {{ form_task.time_due(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form_task.time_line.errors %}
+                            {% for error in form_task.time_due.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.time_line(class="form-control form-control-sm text-primary", placeholder='Task') }}
+                        {{ form_task.time_due(class="form-control form-control-sm text-primary", placeholder='Task') }}
                     {% endif %}
                 </div>
                 <div class="form-group">

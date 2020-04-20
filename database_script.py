@@ -21,6 +21,8 @@ alembic_version.to_excel(writer, sheet_name='alembic_version', index=False)
 writer.save()
 
 # Insert data to db
-# task = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='task')
-# task.to_sql(name='task', con=engine, index=False, if_exists='append')
+task = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='task')
+strategy = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='strategy')
+task.to_sql(name='task', con=engine, index=False, if_exists='append')
+strategy.to_sql(name='strategy', con=engine, index=False, if_exists='append')
 # Check docs for extra options: e.g. if_exists='replace', index_label='id'
