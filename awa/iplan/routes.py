@@ -21,8 +21,7 @@ def home():
 @iplan.route('/iplan/timeline', methods=['GET', 'POST'])
 def timeline():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
-    strategies = Strategy.query.order_by(Strategy.order).all()
-    return render_template('iplan/timeline.html', tasks=tasks, strategies=strategies, string_from_duration=string_from_duration,
+    return render_template('iplan/timeline.html', tasks=tasks, string_from_duration=string_from_duration,
                            now=datetime.now(), fromtimestamp=datetime.fromtimestamp, timeline_ranges=timeline_ranges,
                            get_index_in_timeline_for_current_task=get_index_in_timeline_for_current_task)
 
