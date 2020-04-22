@@ -3,10 +3,9 @@ from awa import db
 from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan._initial_setup import *
-from datetime import date, timedelta
-from awa.iplan.utils import (duration_from_string, string_from_duration, reverse_dict, reorder_tasks,
-                             generate_fields_for_timeline, timeline_ranges, get_moment_in_timeline,
-                             get_index_in_timeline_for_current_task, get_timestamp_for_timeline_category)
+from datetime import timedelta
+from awa.iplan.utils import (TimeLine, duration_from_string, string_from_duration, reverse_dict, reorder_tasks)
+
 
 iplan = Blueprint(name='iplan', import_name=__name__)
 
@@ -21,9 +20,8 @@ def home():
 @iplan.route('/iplan/timeline', methods=['GET', 'POST'])
 def timeline():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
-    return render_template('iplan/timeline.html', tasks=tasks, string_from_duration=string_from_duration,
-                           now=datetime.now(), fromtimestamp=datetime.fromtimestamp, timeline_ranges=timeline_ranges,
-                           get_index_in_timeline_for_current_task=get_index_in_timeline_for_current_task)
+    return render_template('iplan/timeline.html', tasks=tasks, TimeLine=TimeLine,
+                           string_from_duration=string_from_duration, now=datetime.now())
 
 
 @iplan.route('/iplan/task', methods=['GET', 'POST'])
@@ -50,14 +48,14 @@ def task_open():
                            string_from_duration=string_from_duration, now=datetime.now())
 
 
-@iplan.route('/iplan/task/create/timeline_<timeline_category>', methods=['GET', 'POST'])
-def task_create(timeline_category='Now'):
+@iplan.route('/iplan/task/create/timeline_catgory_<timeline_category>', methods=['GET', 'POST'])
+def task_create(timeline_category='This Week'):
     form_task = TaskForm()
     # Dynamic choices
     form_task.id_strategy.choices = [(item.id, item.name) for item in Strategy.query.order_by(Strategy.order).all()]
     form_task.category.choices = TASK_CATEGORY_CHOICES
     form_task.frequency.choices = TASK_FREQUENCY_CHOICES
-    form_task.time_due.choices = generate_fields_for_timeline()
+    form_task.time_line.choices = TimeLine.selectfield_choices()
     if form_task.validate_on_submit():
         task = Task(name=form_task.name.data, desc=form_task.desc.data,
                 duration_plan=duration_from_string(form_task.duration_plan.data),
@@ -66,14 +64,14 @@ def task_create(timeline_category='Now'):
                 frequency=dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data),
                 id_strategy=form_task.id_strategy.data,
                 order=form_task.order.data,
-                time_due=datetime.fromtimestamp(form_task.time_due.data))
+                time_line=form_task.time_line.data)
         db.session.add(task)
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
     elif request.method == 'GET':
         form_task.order.data = 0
         form_task.submit.label.text = 'Create task'
-        form_task.time_due.data = get_timestamp_for_timeline_category(timeline_category=timeline_category)
+        form_task.time_line.data = timeline_category
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Create New Task')
 
 
@@ -84,7 +82,7 @@ def task_update(id_task):
     form_task.id_strategy.choices = [(item.id, item.name) for item in Strategy.query.all()]
     form_task.category.choices = TASK_CATEGORY_CHOICES
     form_task.frequency.choices = TASK_FREQUENCY_CHOICES
-    form_task.time_due.choices = generate_fields_for_timeline()
+    form_task.time_line.choices = TimeLine.selectfield_choices()
 
     task = Task.query.get_or_404(id_task)
     if form_task.validate_on_submit():
@@ -95,7 +93,7 @@ def task_update(id_task):
         task.frequency = dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data)
         task.duration_plan = duration_from_string(form_task.duration_plan.data)
         task.duration_real = duration_from_string(form_task.duration_real.data)
-        task.time_due = datetime.fromtimestamp(form_task.time_due.data)
+        task.time_line = form_task.time_line.data
         task.order = form_task.order.data
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -108,9 +106,9 @@ def task_update(id_task):
         form_task.duration_plan.data = string_from_duration(task.duration_plan)
         form_task.duration_real.data = string_from_duration(task.duration_real)
         form_task.order.data = task.order
-        form_task.time_due.data = task.time_due.timestamp()
+        form_task.time_line.data = task.time_line
         form_task.submit.label.text = 'Update task'
-    return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task', choices=form_task.time_due.choices)
+    return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task')
 
 
 @iplan.route('/iplan/task/complete/<id_task>', methods=['GET', 'POST'])
@@ -123,7 +121,8 @@ def task_complete(id_task):
                         duration_plan=task.duration_plan, duration_real=timedelta(0),
                         category=task.category, frequency=task.frequency,
                         id_strategy=task.id_strategy, order=task.order,
-                        time_due=task.time_due + timedelta(days=1))
+                        time_line='This Week',
+                        time_creation=datetime.now() + timedelta(days=1))
         db.session.add(new_task)
         flash('Task completed. New task created and move on next day.', 'success')
     else:
@@ -148,15 +147,15 @@ def task_move(id_task, direction):
     new_orders_of_ids = reorder_tasks(direction=direction, task_id=task.id,
                                       current_order_of_ids=[task.id for task in tasks])
     for i, task in enumerate(tasks):
-        task.order = new_orders_of_ids[i] + get_index_in_timeline_for_current_task(task.time_due) * 100
+        task.order = new_orders_of_ids[i] + TimeLine.get_timeline_index(task.time_line) * 100
     db.session.commit()
     return redirect(url_for('iplan.timeline'))
 
 
-@iplan.route('/iplan/task/move_timeline_<direction>/<id_task>', methods=['GET', 'POST'])
+@iplan.route('/iplan/task/move_timeline_to_<direction>/<id_task>', methods=['GET', 'POST'])
 def task_move_timeline(id_task, direction):
     task = Task.query.get_or_404(id_task)
-    task.time_due = get_moment_in_timeline(current_timeline=task.time_due, direction=direction)
+    task.time_line = TimeLine.move_in_timeline(current_timeline=task.time_line, direction=direction)
     db.session.commit()
     return redirect(url_for('iplan.timeline'))
 

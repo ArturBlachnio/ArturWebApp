@@ -2,10 +2,67 @@ from datetime import timedelta, datetime, date
 import re
 from awa.iplan._initial_setup import LATER_HRS, DISPLAY_EVENING_TILL_HOUR, DISPLAY_LATER_TILL_HOUR
 
-"""
-timeline_category - Now, Later (+xh), in the evening,...
-timeline_timestamp - datetime.timestamps for a given timeline_category 
-"""
+
+class TimeLine:
+    # List of all potential categories/choices.
+    _now = 'Now'
+    _later = 'Later Today'
+    _thisweek = 'This Week'
+    _nextweek = 'Next Week'
+    _thismonth = 'This Month'
+    _thisyear = 'This Year'
+    categories = [_now, _later, _thisweek, _nextweek, _thismonth, _thisyear]
+
+    # Timeline with warning indicators [(category, timeUoM, (warning, danger))]
+    _progress_indidators = [(_now, 'h', (2, 6)),
+                            (_later, 'h', (4, 8)),
+                            (_thisweek, 'd', (2, 4)),
+                            (_nextweek, 'w', (1, 3)),
+                            (_thismonth, 'm', (1, 6)),
+                            (_thisyear, 'm', (1, 6))]
+
+    _progress_colors = {'attention': 'badge badge-secondary','warning': 'badge badge-warning', 'danger': 'badge badge-danger'}
+    _seconds_in_unites = {'h': 3600, 'd': 24 * 3600, 'w': 7 * 24 * 3600, 'm': 30.416 * 24 * 3600}
+
+    @staticmethod
+    def selectfield_choices():
+        """ Returns list of choices for SelectField. [(c1, c1), ... (cN, cN)]. """
+        return [(x, x) for x in TimeLine.categories]
+
+    @staticmethod
+    def get_timeline_index(current_timeline):
+        """ Returns positon (index) in timeline. Used for ordering task. """
+        return TimeLine.categories.index(current_timeline)
+
+    @staticmethod
+    def move_in_timeline(current_timeline, direction):
+        """ Returns new position in timeline depending on direction (right: next, left: previous). """
+        index_timeline = TimeLine.categories.index(current_timeline)
+
+        index_next = min(index_timeline + 1, len(TimeLine.categories) - 1)
+        index_prev = max(index_timeline - 1, 0)
+
+        if direction == 'next':
+            return TimeLine.categories[index_next]
+        elif direction == 'previous':
+            return TimeLine.categories[index_prev]
+        else:
+            return current_timeline
+
+    @staticmethod
+    def progress_indicator(time_creation, timeline_category):
+        for indicator in TimeLine._progress_indidators:
+            if timeline_category == indicator[0]:  # Check on timeline category
+                seconds_since_creation = (datetime.now()-time_creation).total_seconds()
+                uom_since_creation = int(seconds_since_creation / TimeLine._seconds_in_unites[indicator[1]])
+                if uom_since_creation >= indicator[2][0] and uom_since_creation < indicator[2][1]:
+                    return f'{uom_since_creation}{indicator[1]}', TimeLine._progress_colors['attention']
+                elif uom_since_creation >= indicator[2][1]:
+                    return f'{uom_since_creation}{indicator[1]}', TimeLine._progress_colors['warning']
+                else:
+                    return None
+                break
+
 
 def reverse_dict(x):
     """ Applied for SelectField choices in updating forms
@@ -13,137 +70,6 @@ def reverse_dict(x):
     # todo - just to be sure, remove possibility of have 2 same values for 1 key (pick first one)
     return {v: k for (k, v) in dict(x).items()}
 
-
-def generate_fields_for_timeline(_testing_days_up=0, LATER_HRS=LATER_HRS):
-    """ Returns choices for time_due SelectField.
-    Shape: [(datetime1, category1), (datetimeN, categoryN)]
-    """
-    today = datetime.fromordinal(date.today().toordinal()) + timedelta(days=_testing_days_up)
-    _now = datetime.now()
-    _today = (today, 'Now')
-
-    # LATER_HRS after 20.00 will be adjusted to not go for next day (e.g. if it's 22.00 it will be 23.59)
-    if 24 - LATER_HRS <= _now.hour:
-        LATER_HRS = 24 - _now.hour - 1
-    _later = (datetime(year=_now.year, month=_now.month, day=_now.day, hour=_now.hour) + timedelta(hours=LATER_HRS), f'Later (+{LATER_HRS}h)')
-    _evening = (today + timedelta(hours=20), 'In the evening')
-    _tomorrow = (today + timedelta(days=1), 'Tomorrow')
-    _in2days = (today + timedelta(days=2), f'On {(today + timedelta(days=2)).strftime("%A")}')
-
-    # _nextweek must be at least 1day later then _in2days
-    _nextweek = (today + timedelta(days=8-today.isoweekday()), 'Next week')
-    if _nextweek[0] <= _in2days[0]:
-        _nextweek = (_in2days[0] + timedelta(days=1), _nextweek[1])
-
-    # _nextmonth must be at least in next month counting from _nextweek
-    if today.month == 12:
-        _nextmonth = (datetime(year=today.year+1, month=1, day=1), 'Next month')
-    else:
-        _nextmonth = (datetime(year=today.year, month=today.month+1, day=1), 'Next month')
-    if _nextmonth[0] <= _nextweek[0]:
-        if today.month == 12:
-            _nextmonth = (datetime(year=today.year + 1, month=2, day=1), _nextmonth[1])
-        else:
-            _nextmonth = (datetime(year=today.year, month=today.month+2, day=1), _nextmonth[1])
-
-    # _thisyear - last day in this year
-    _thisyear = (datetime(year=today.year+1, month=1, day=1)-timedelta(days=1), 'This year')
-
-    # _nextyear - last day in this year
-    _nextyear = (datetime(year=today.year+2, month=1, day=1)-timedelta(days=1), 'Next year')
-
-    choices = [_today, _later, _evening, _tomorrow, _in2days, _nextweek, _nextmonth, _thisyear, _nextyear]
-    # Do not display _later and _evening choices if they are not displayed anymote (in function timeline_ranges)
-    if datetime.now().hour > DISPLAY_LATER_TILL_HOUR:
-        choices.remove(_later)
-    if datetime.now().hour > DISPLAY_EVENING_TILL_HOUR:
-        choices.remove(_evening)
-    timestamp_choices = [(int(item[0].timestamp()), item[1]) for item in choices]
-    return timestamp_choices
-
-# for item in generate_fields_for_timeline():
-#     print(item, datetime.fromtimestamp(item[0]))
-
-
-def timeline_ranges(_testing_days_up=0):
-    """ Used in timeline.html. Displays timeline divs and checks if task belongs to category. """
-    a = [(int(datetime(year=1980, month=1, day=1).timestamp()), 'Now')]
-    a.extend(generate_fields_for_timeline(_testing_days_up)[1:])
-    a.append((int(datetime(year=date.today().year+100, month=1, day=1).timestamp()), '100 years from now'))
-    # Between _now & _later: replace 'till moment'  with datetime.now()
-    # Do not display at all after 19:00
-    if datetime.now().hour < DISPLAY_LATER_TILL_HOUR:
-        a[1] = (int((datetime.now()).timestamp()), a[1][1])
-    else:
-        for i, item in enumerate(a):
-            if item[1] == f'Later (+{LATER_HRS}h)':
-                a.pop(i)
-                break
-
-    # Between _later & _evening: replace 'till moment'  with max(datetime.now() & 20:00).
-    # Do not display at all after 20:00
-    if datetime.now().hour < DISPLAY_EVENING_TILL_HOUR:
-        a[2] = (max(a[2][0], int((datetime.now()).timestamp())), a[2][1])
-    else:
-        for i, item in enumerate(a):
-            if item[1] == 'In the evening':
-                a.pop(i)
-                break
-    # Make from-to-name tuples
-    ranges = []
-    for i in range(len(a)-1):
-        ranges.append((a[i][0], a[i+1][0], a[i][1]))
-    return ranges
-
-
-def get_index_in_timeline_for_current_task(current_timeline):
-    """ Returns index of (displayed) timeline. Used to order tasks."""
-    # Get index of current timeline
-    index_timeline = 0
-    for i, time_range in enumerate(timeline_ranges()):
-        if current_timeline.timestamp() >= time_range[0] and current_timeline.timestamp() < time_range[1]:
-            index_timeline = i
-            break
-    return index_timeline
-
-def get_timestamp_for_timeline_category(timeline_category='Now'):
-    """ Used to create New Task with preassigned timeline_category (e.g Now, Later (+4h).
-    Returns datetime.timestamp for given timeline_category as used in SelectField"""
-
-    timeline_timestamp = None
-
-    for item in generate_fields_for_timeline():
-        if item[1] == timeline_category:
-            timeline_timestamp = item[0]
-    return timeline_timestamp
-
-
-def get_moment_in_timeline(current_timeline, direction='next'):
-    """ Returns task new position (as datetime) on timeline depending on direction (right: next, left: previous).
-    """
-    # Get index of current timeline
-    index_timeline = get_index_in_timeline_for_current_task(current_timeline=current_timeline)
-
-    index_next = min(index_timeline + 1, len(timeline_ranges())-1)
-    index_prev = max(index_timeline - 1, 0)
-
-    # For testing
-    # print('current:', index_timeline, datetime.fromtimestamp(timeline_ranges()[index_timeline][0]), datetime.fromtimestamp(timeline_ranges()[index_timeline][1]))
-    # print('next:', index_next, datetime.fromtimestamp(timeline_ranges()[index_next][0]), datetime.fromtimestamp(timeline_ranges()[index_next][1]))
-    # print('prev:', index_prev, datetime.fromtimestamp(timeline_ranges()[index_prev][0]), datetime.fromtimestamp(timeline_ranges()[index_prev][1]))
-
-    # Return last possible time minus 1 minute
-    if direction == 'next':
-        return datetime.fromtimestamp(timeline_ranges()[index_next][1]) - timedelta(minutes=1)
-    elif direction == 'previous':
-        return datetime.fromtimestamp(timeline_ranges()[index_prev][1]) - timedelta(minutes=1)
-    else:
-        return datetime.now()
-
-# for i in range(270, 275):
-#     print(i)
-#     generate_fields_for_timeline(i)
-# generate_fields_for_timeline()
 
 def duration_from_string(x):
     """ Converts string to valid datatime.timedelta

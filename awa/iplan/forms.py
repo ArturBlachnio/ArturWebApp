@@ -10,7 +10,7 @@ class TaskForm(FlaskForm):
     duration_plan = StringField(label='Duration Plan')  # Is converted to Interval with duration_from_string
     duration_real = StringField(label='Duration Real')
     category = SelectField(label='Category', coerce=int)
-    time_due = SelectField(label='Timeline', coerce=int)
+    time_line = SelectField(label='Timeline')
     # Coerce=int - browser sends data in str format so function is needed to transform it
     frequency = SelectField(label='Frequency', coerce=int)
     order = IntegerField(label='Order')

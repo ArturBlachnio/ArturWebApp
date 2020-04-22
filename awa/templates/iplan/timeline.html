@@ -6,24 +6,34 @@
             <a  href="{{url_for('iplan.show_menu_all', state='on') }}" class="btn btn-light btn-sm" role="button">Menu On</a>
             <a  href="{{url_for('iplan.show_menu_all', state='off') }}" class="btn btn-light btn-sm" role="button">Menu Off</a>
         </div>
-        {% for timeline in timeline_ranges()%}
+        {% for timeline in TimeLine.categories %}
         <div class="col-md-4 border p-1 rounded">
             <div class="col-12 border timeline_task_border rounded p-0">
-                <small class="timeline_header ml-1">{{ timeline[2] }} </small>
-                <small class="timeline_header text-muted">({{fromtimestamp(timeline[0]).strftime('%d.%m %H:%M')}} - {{fromtimestamp(timeline[1]).strftime('%d.%m %H:%M')}})</small>
-                <a href="{{ url_for('iplan.task_create', timeline_category=timeline[2]) }}"><small class="timeline_header text-primary">New Task</small></a>
+                <small class="timeline_header ml-1">{{ timeline }} </small>
+                <small class="timeline_header text-muted">XYZ</small>
+                <a href="{{ url_for('iplan.task_create', timeline_category=timeline) }}"><small class="timeline_header text-primary">New Task</small></a>
                 {% for task in tasks %}
-                    {% if task.time_due >= fromtimestamp(timeline[0]) and task.time_due < fromtimestamp(timeline[1]) %}
+                    {% if task.time_line == timeline %}
                         <!-- Name -->
                         {% if task.show_menu == False %}
                             <div class="row rounded border border border-secondary timeline_task_name pl-1  mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
-                                <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links">{{task.name}}</a>
-                                <small class="timeline_header text-muted">({{task.time_due.strftime('%d.%m %H:%M')}})</small>
+                                {% if TimeLine.progress_indicator(task.time_creation, timeline)[0] %}
+                                    <div class="col text-truncate p-0 m-0 mr-1">
+                                        <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
+                                    </div>
+                                    <div class="col-auto p-0 m-0 text-right">
+                                        <small class="{{TimeLine.progress_indicator(task.time_creation, timeline)[1]}} mr-1 progress_indicator">{{TimeLine.progress_indicator(task.time_creation, timeline)[0]}}</small>
+                                    </div>
+                                {% else %}
+                                    <div class="text-truncate p-0 m-0 mr-1">
+                                        <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
+                                    </div>
+                                {% endif %}
                             </div>
                         {% else %}
                             <div class="row rounded-top border border-bottom-0 border-secondary timeline_task_name pl-1 pb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
-                                    <a href="{{url_for('iplan.show_menu', id_task=task.id, state='off') }}" class="show_menu_links">{{task.name}}</a>
-                                    <small class="timeline_header text-muted">({{task.time_due.strftime('%d.%m %H:%M')}})</small>
+                                <a href="{{url_for('iplan.show_menu', id_task=task.id, state='off') }}" class="show_menu_links">{{task.name}}</a>
+
                             </div>
                             <!-- Buttons -->
                             <div class="row rounded-bottom border border-top-0 border-secondary timeline_task_buttons mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
@@ -47,8 +57,8 @@
                                 {% endif %}
                                 <a href="#" class="badge badge-info">{{string_from_duration(task.duration_real)}}</a>
                                 <a href="#" class="badge badge-light">{{string_from_duration(task.duration_plan)}}</a>
-                                <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-danger">Del</a>
-<!--                                <small class="timeline_header text-muted ml-auto">({{task.time_due.strftime('%dd%H:%M')}})</small>-->
+                                <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-dark">Del</a>
+                                <a href="#" data-toggle="tooltip" class="badge badge-info" data-html="true" title="{{task}}">i</a>
                                 <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary ml-auto">Edit</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top')}}" class="badge badge-secondary">top</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up')}}" class="badge badge-secondary">up</a>

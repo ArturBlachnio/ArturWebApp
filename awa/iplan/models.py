@@ -40,9 +40,10 @@ class Task(db.Model):
     desc = db.Column(db.Text)
     category = db.Column(db.String(20))
     frequency = db.Column(db.String(10))
-    time_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    time_creation = db.Column(db.DateTime, default=datetime.now)
     time_completion = db.Column(db.DateTime)
-    time_due = db.Column(db.DateTime)
+    time_due = db.Column(db.DateTime)  # THis is not used now, it was used for old timeline concept
+    time_line = db.Column(db.String(20))
     duration_plan = db.Column(db.Interval, nullable=False, default=timedelta(0))
     duration_real = db.Column(db.Interval, nullable=False, default=timedelta(0))
     timer_start = db.Column(db.DateTime)
@@ -54,7 +55,7 @@ class Task(db.Model):
     def __repr__(self):
         return f"Task(id='{self.id}', name='{self.name}', desc='{self.desc}', category='{self.category}', " \
                f"frequency='{self.frequency}', time_creation='{self.time_creation}', " \
-               f"time_completion='{self.time_completion}', time_due='{self.time_due}', " \
+               f"time_completion='{self.time_completion}', time_due='{self.time_due}', time_line='{self.time_line}', " \
                f"duration_plan='{self.duration_plan}', duration_real='{self.duration_real}', " \
                f"timer_start='{self.timer_start}', order='{self.order}', show_menu='{self.show_menu}', " \
                f"id_strategy='{self.id_strategy}', id_project='{self.id_project}')"
