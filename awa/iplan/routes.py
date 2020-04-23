@@ -3,7 +3,7 @@ from awa import db
 from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan._initial_setup import *
-from datetime import timedelta
+from datetime import timedelta, date, datetime
 from awa.iplan.utils import (TimeLine, duration_from_string, string_from_duration, reverse_dict, reorder_tasks)
 
 
@@ -20,8 +20,17 @@ def home():
 @iplan.route('/iplan/timeline', methods=['GET', 'POST'])
 def timeline():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
-    return render_template('iplan/timeline.html', tasks=tasks, TimeLine=TimeLine,
+    strategies = Strategy.query.all()
+    # todo - count using sql
+    count_tasks = dict(zip([strategy.id for strategy in strategies], [0 for _ in range(len(strategies))]))
+    for task in tasks:
+        if task.strategy.id in count_tasks:
+            count_tasks[task.strategy.id] += 1
+
+    return render_template('iplan/timeline.html', tasks=tasks, TimeLine=TimeLine, strategies=strategies, count_tasks=count_tasks,
                            string_from_duration=string_from_duration, now=datetime.now())
+
+
 
 
 @iplan.route('/iplan/task', methods=['GET', 'POST'])
@@ -30,6 +39,11 @@ def task():
     strategies = Strategy.query.all()
     return render_template('iplan/task.html', tasks=tasks, strategies=strategies,
                            string_from_duration=string_from_duration, now=datetime.now())
+
+@iplan.route('/iplan/task/donetoday', methods=['GET', 'POST'])
+def task_donetoday():
+    tasks = Task.query.filter(Task.time_completion>=date.today()).order_by(Task.order).all()
+    return render_template('iplan/task.html', tasks=tasks, string_from_duration=string_from_duration, now=datetime.now())
 
 
 @iplan.route('/iplan/task/completed', methods=['GET', 'POST'])
@@ -64,7 +78,8 @@ def task_create(timeline_category='This Week'):
                 frequency=dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data),
                 id_strategy=form_task.id_strategy.data,
                 order=form_task.order.data,
-                time_line=form_task.time_line.data)
+                time_line=form_task.time_line.data,
+                time_due=form_task.time_due.data)
         db.session.add(task)
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -72,6 +87,7 @@ def task_create(timeline_category='This Week'):
         form_task.order.data = 0
         form_task.submit.label.text = 'Create task'
         form_task.time_line.data = timeline_category
+        form_task.time_due.data = datetime.now() + timedelta(days=DUE_DATE_INITIAL_DAYS)
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Create New Task')
 
 
@@ -94,6 +110,7 @@ def task_update(id_task):
         task.duration_plan = duration_from_string(form_task.duration_plan.data)
         task.duration_real = duration_from_string(form_task.duration_real.data)
         task.time_line = form_task.time_line.data
+        task.time_due = form_task.time_due.data
         task.order = form_task.order.data
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -107,6 +124,7 @@ def task_update(id_task):
         form_task.duration_real.data = string_from_duration(task.duration_real)
         form_task.order.data = task.order
         form_task.time_line.data = task.time_line
+        form_task.time_due.data = task.time_due
         form_task.submit.label.text = 'Update task'
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task')
 
@@ -124,9 +142,6 @@ def task_complete(id_task):
                         time_line='This Week',
                         time_creation=datetime.now() + timedelta(days=1))
         db.session.add(new_task)
-        flash('Task completed. New task created and move on next day.', 'success')
-    else:
-        flash('Task completed.', 'success')
     db.session.commit()
     return redirect(url_for('iplan.timeline'))
 
@@ -135,7 +150,6 @@ def task_complete(id_task):
 def task_restore(id_task):
     task = Task.query.get_or_404(id_task)
     task.time_completion = None
-    flash('Task restored.', 'success')
     db.session.commit()
     return redirect(request.referrer)
 
@@ -185,7 +199,6 @@ def task_delete(id_task):
     task = Task.query.get_or_404(id_task)
     db.session.delete(task)
     db.session.commit()
-    flash('Task has been deleted', 'success')
     return redirect(request.referrer)
 
 
@@ -213,6 +226,14 @@ def show_menu_all(state):
     return redirect(request.referrer)
 
 
+@iplan.route('/iplan/task/show_strategy_timeline_<id_strategy>', methods=['GET', 'POST'])
+def show_strategy_timeline(id_strategy):
+    strategy = Strategy.query.get_or_404(id_strategy)
+    strategy.show_timeline = not strategy.show_timeline
+    db.session.commit()
+    return redirect(request.referrer)
+
+
 @iplan.route('/iplan/strategy', methods=['GET', 'POST'])
 def strategy():
     strategies = Strategy.query.order_by(Strategy.order).all()
@@ -233,7 +254,6 @@ def strategy_create():
                                  category=dict(STRATEGY_CATEGORY_CHOICES).get(form.category.data))
         db.session.add(item_strategy)
         db.session.commit()
-        flash('New strategy has been created.', 'success')
         return redirect(url_for('iplan.strategy'))
     elif request.method == 'GET':
         form.order.data = 0
@@ -255,7 +275,6 @@ def strategy_update(id_strategy):
         item_strategy.order = form.order.data
         item_strategy.category = dict(STRATEGY_CATEGORY_CHOICES).get(form.category.data)
         db.session.commit()
-        flash('Strategy has been updated.', 'success')
         return redirect(url_for('iplan.strategy'))
     elif request.method == 'GET':
         form.name.data = item_strategy.name

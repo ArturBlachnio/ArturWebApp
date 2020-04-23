@@ -2,9 +2,18 @@
 {% block content %}
 <div class="container">
     <div class="row content-section">
-        <div class="col-md-12 border p-1 rounded mb-1">
-            <a  href="{{url_for('iplan.show_menu_all', state='on') }}" class="btn btn-light btn-sm" role="button">Menu On</a>
-            <a  href="{{url_for('iplan.show_menu_all', state='off') }}" class="btn btn-light btn-sm" role="button">Menu Off</a>
+        <div class="col-md-12 border p-1 rounded mb-1 ">
+            <a  href="{{url_for('iplan.show_menu_all', state='on') }}" class="btn btn-secondary btn-sm" role="button">Menu On</a>
+            <a  href="{{url_for('iplan.show_menu_all', state='off') }}" class="btn btn-secondary btn-sm" role="button">Menu Off</a>
+            {% for strategy in strategies %}
+                {% if count_tasks[strategy.id] > 0%}
+                    {% if strategy.show_timeline %}
+                        <a  href="{{url_for('iplan.show_strategy_timeline', id_strategy=strategy.id) }}" class="btn btn-sm" style="background-color:{{strategy.color}}" role="button">{{strategy.symbol}} ({{count_tasks[strategy.id]}})</a>
+                    {% else %}
+                        <a  href="{{url_for('iplan.show_strategy_timeline', id_strategy=strategy.id) }}" class="btn btn-light btn-sm" role="button">{{strategy.symbol}} ({{count_tasks[strategy.id]}})</a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
         </div>
         {% for timeline in TimeLine.categories %}
         <div class="col-md-4 border p-1 rounded">
@@ -13,7 +22,7 @@
                 <small class="timeline_header text-muted">XYZ</small>
                 <a href="{{ url_for('iplan.task_create', timeline_category=timeline) }}"><small class="timeline_header text-primary">New Task</small></a>
                 {% for task in tasks %}
-                    {% if task.time_line == timeline %}
+                    {% if task.time_line == timeline and task.strategy.show_timeline %}
                         <!-- Name -->
                         {% if task.show_menu == False %}
                             <div class="row rounded border border border-secondary timeline_task_name pl-1  mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
@@ -22,12 +31,20 @@
                                         <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
                                     </div>
                                     <div class="col-auto p-0 m-0 text-right">
-                                        <small class="{{TimeLine.progress_indicator(task.time_creation, timeline)[1]}} mr-1 progress_indicator">{{TimeLine.progress_indicator(task.time_creation, timeline)[0]}}</small>
+                                        {% if TimeLine.duedate_indicator(task.time_due)[0] %}
+                                            <small class="{{TimeLine.duedate_indicator(task.time_due)[1]}} m-0 progress_indicator">{{TimeLine.duedate_indicator(task.time_due)[0]}}</small>
+                                        {% endif %}
+                                        <small class="{{TimeLine.progress_indicator(task.time_creation, timeline)[1]}} mr-1 progress_indicator badge-pill">{{TimeLine.progress_indicator(task.time_creation, timeline)[0]}}</small>
                                     </div>
                                 {% else %}
-                                    <div class="text-truncate p-0 m-0 mr-1">
+                                    <div class="col text-truncate p-0 m-0 mr-1">
                                         <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
                                     </div>
+                                    {% if TimeLine.duedate_indicator(task.time_due)[0] %}
+                                        <div class="col-auto p-0 m-0 text-right">
+                                            <small class="{{TimeLine.duedate_indicator(task.time_due)[1]}} mr-1 progress_indicator">{{TimeLine.duedate_indicator(task.time_due)[0]}}</small>
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         {% else %}

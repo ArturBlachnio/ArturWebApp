@@ -18,6 +18,7 @@ class Strategy(db.Model):
     order = db.Column(db.Integer)
     time_creation = db.Column(db.DateTime, default=datetime.now)
     time_completion = db.Column(db.DateTime)
+    show_timeline = db.Column(db.Boolean, default=True, nullable=False)
     category = db.Column(db.String(20), nullable=True)
     br_task = db.relationship('Task', backref='strategy')  # todo: lazy=True - test that later
     br_project = db.relationship('Project', backref='strategy')  # todo: lazy=True - test that later
@@ -25,13 +26,14 @@ class Strategy(db.Model):
     def __repr__(self):
         return f"Strategy(id='{self.id}', name='{self.name}', symbol='{self.symbol}', desc='{self.desc}'," \
                f" color='{self.color}, order='{self.order}', time_creation='{self.time_creation}'," \
-               f" time_completion='{self.time_completion}', category='{self.category}')"
+               f" time_completion='{self.time_completion}', show_timeline='{self.show_timeline}', category='{self.category}')"
 
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(40), nullable=False)
     id_strategy = db.Column(db.Integer, db.ForeignKey('strategy.id'), nullable=False)
+    show_timeline = db.Column(db.Boolean, default=True, nullable=False)
 
 
 class Task(db.Model):

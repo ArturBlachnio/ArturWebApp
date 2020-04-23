@@ -1,6 +1,5 @@
 from datetime import timedelta, datetime, date
 import re
-from awa.iplan._initial_setup import LATER_HRS, DISPLAY_EVENING_TILL_HOUR, DISPLAY_LATER_TILL_HOUR
 
 
 class TimeLine:
@@ -20,8 +19,8 @@ class TimeLine:
                             (_nextweek, 'w', (1, 3)),
                             (_thismonth, 'm', (1, 6)),
                             (_thisyear, 'm', (1, 6))]
-
-    _progress_colors = {'attention': 'badge badge-secondary','warning': 'badge badge-warning', 'danger': 'badge badge-danger'}
+    _attention_colors = {'attention': 'badge badge-secondary','warning': 'badge badge-warning', 'danger': 'badge badge-danger'}
+    _duedate_breakpoints = {'warning': 1, 'danger': 0}
     _seconds_in_unites = {'h': 3600, 'd': 24 * 3600, 'w': 7 * 24 * 3600, 'm': 30.416 * 24 * 3600}
 
     @staticmethod
@@ -51,17 +50,35 @@ class TimeLine:
 
     @staticmethod
     def progress_indicator(time_creation, timeline_category):
+        """ Returns amount of timeUoM since task creation. """
         for indicator in TimeLine._progress_indidators:
             if timeline_category == indicator[0]:  # Check on timeline category
                 seconds_since_creation = (datetime.now()-time_creation).total_seconds()
                 uom_since_creation = int(seconds_since_creation / TimeLine._seconds_in_unites[indicator[1]])
                 if uom_since_creation >= indicator[2][0] and uom_since_creation < indicator[2][1]:
-                    return f'{uom_since_creation}{indicator[1]}', TimeLine._progress_colors['attention']
+                    return f'{uom_since_creation}{indicator[1]}', TimeLine._attention_colors['attention']
                 elif uom_since_creation >= indicator[2][1]:
-                    return f'{uom_since_creation}{indicator[1]}', TimeLine._progress_colors['warning']
+                    return f'{uom_since_creation}{indicator[1]}', TimeLine._attention_colors['warning']
                 else:
                     return None
                 break
+
+    @staticmethod
+    def duedate_indicator(time_due):
+        """ Returns amount of days till due time"""
+        if time_due is None:
+            return None
+        days_left = (time_due - datetime.now()).days + 1
+        if days_left <= TimeLine._duedate_breakpoints['warning'] and days_left > TimeLine._duedate_breakpoints['danger']:
+            return f'{days_left} days left', TimeLine._attention_colors['warning']
+        elif days_left <= TimeLine._duedate_breakpoints['danger'] and days_left > 0:
+            return f'{days_left} day left!', TimeLine._attention_colors['danger']
+        elif days_left == 0:
+            return f'Due today!', TimeLine._attention_colors['danger']
+        elif days_left < 0:
+            return f'Too late!', TimeLine._attention_colors['danger']
+        else:
+            return None
 
 
 def reverse_dict(x):
