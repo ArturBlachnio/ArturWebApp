@@ -43,7 +43,15 @@ def task():
 @iplan.route('/iplan/task/donetoday', methods=['GET', 'POST'])
 def task_donetoday():
     tasks = Task.query.filter(Task.time_completion>=date.today()).order_by(Task.order).all()
-    return render_template('iplan/task.html', tasks=tasks, string_from_duration=string_from_duration, now=datetime.now())
+    strategies = Strategy.query.all()
+    sum_duration = dict()
+    for task in tasks:
+        if task.strategy.name in sum_duration:
+            sum_duration[task.strategy.name] += task.duration_real
+        else:
+            sum_duration[task.strategy.name] = task.duration_real
+    return render_template('iplan/task.html', tasks=tasks, string_from_duration=string_from_duration, now=datetime.now(),
+                           strategies=strategies, sum_duration=sum_duration)
 
 
 @iplan.route('/iplan/task/completed', methods=['GET', 'POST'])
@@ -134,7 +142,7 @@ def task_complete(id_task):
     task = Task.query.get_or_404(id_task)
     task.time_completion = datetime.now()
     # Add new task if task was repeatable
-    if task.frequency == 'Continues':
+    if task.frequency == 'Repeatable':
         new_task = Task(name=task.name, desc=task.desc,
                         duration_plan=task.duration_plan, duration_real=timedelta(0),
                         category=task.category, frequency=task.frequency,

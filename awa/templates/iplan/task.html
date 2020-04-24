@@ -55,6 +55,20 @@
         {% endfor %}
     </div>
 
+    <div class="content-section">
+        {% for item in sum_duration.items() %}
+        <div class="row">
+            <div class="col border rounded-right mt-1 mb-1">
+                <div class="row p-0">
+                    <div class="col-auto">
+                        <small class="text-muted">{{item[0]}}: {{ string_from_duration(item[1]) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
    <div class="content-section">
         {% for task in tasks %}
         <div class="row">

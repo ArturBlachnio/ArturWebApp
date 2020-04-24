@@ -12,16 +12,27 @@ class TimeLine:
     _thisyear = 'This Year'
     categories = [_now, _later, _thisweek, _nextweek, _thismonth, _thisyear]
 
-    # Timeline with warning indicators [(category, timeUoM, (warning, danger))]
-    _progress_indidators = [(_now, 'h', (2, 6)),
+    # Timeline progress indicators (moments since creation) [(category, timeUoM, (warning, danger))]
+    _progress_breakpoints = [(_now, 'h', (2, 6)),
                             (_later, 'h', (4, 8)),
-                            (_thisweek, 'd', (2, 4)),
+                            (_thisweek, 'd', (3, 4)),
                             (_nextweek, 'w', (1, 3)),
                             (_thismonth, 'm', (1, 6)),
                             (_thisyear, 'm', (1, 6))]
-    _attention_colors = {'attention': 'badge badge-secondary','warning': 'badge badge-warning', 'danger': 'badge badge-danger'}
-    _duedate_breakpoints = {'warning': 1, 'danger': 0}
     _seconds_in_unites = {'h': 3600, 'd': 24 * 3600, 'w': 7 * 24 * 3600, 'm': 30.416 * 24 * 3600}
+    _progress_colors = {'attention': 'badge badge-light', 'warning': 'badge badge-secondary'}
+
+    # Timeline duedate indicators (moments till duedate) [(category, timeUoM, time till now())]
+    _duedate_breakpoints = (('dayslate', 'd', -1, 'ago'),
+                            ('hourslate', 'h', 0, 'ago'),
+                            ('danger', 'h', 4, 'left'),
+                            ('warning', 'h', 6, 'left'),
+                            ('warning', 'h', 16, 'left'),
+                            ('warning', 'd', 2, 'left'),
+                            ('attention', 'd', 3, 'left'))
+    _duedate_colors = {'attention': 'badge badge-secondary', 'warning': 'badge badge-warning',
+                       'danger': 'badge badge-danger', 'hourslate': 'badge badge-danger', 'dayslate': 'badge badge-danger'}
+
 
     @staticmethod
     def selectfield_choices():
@@ -51,34 +62,47 @@ class TimeLine:
     @staticmethod
     def progress_indicator(time_creation, timeline_category):
         """ Returns amount of timeUoM since task creation. """
-        for indicator in TimeLine._progress_indidators:
+        for indicator in TimeLine._progress_breakpoints:
             if timeline_category == indicator[0]:  # Check on timeline category
                 seconds_since_creation = (datetime.now()-time_creation).total_seconds()
                 uom_since_creation = int(seconds_since_creation / TimeLine._seconds_in_unites[indicator[1]])
                 if uom_since_creation >= indicator[2][0] and uom_since_creation < indicator[2][1]:
-                    return f'{uom_since_creation}{indicator[1]}', TimeLine._attention_colors['attention']
+                    return f'{uom_since_creation}{indicator[1]}', TimeLine._progress_colors['attention']
                 elif uom_since_creation >= indicator[2][1]:
-                    return f'{uom_since_creation}{indicator[1]}', TimeLine._attention_colors['warning']
+                    return f'{uom_since_creation}{indicator[1]}', TimeLine._progress_colors['warning']
                 else:
                     return None
-                break
+
+
+    @staticmethod
+    def get_msg_for_timeuom(uom, value):
+        """ Return msg of hours, days left (1hr, 2hrs, 2days)"""
+        msg = None
+        if uom == 'h':
+            msg = 'hrs'
+        elif uom == 'd':
+            msg = 'days'
+        elif uom == 'm':
+            msg = 'months'
+        elif uom == 'w':
+            msg = 'weeks'
+        else:
+            msg = '???'
+        if value == 1:
+            msg = msg[:-1]
+        return msg
 
     @staticmethod
     def duedate_indicator(time_due):
         """ Returns amount of days till due time"""
         if time_due is None:
             return None
-        days_left = (time_due - datetime.now()).days + 1
-        if days_left <= TimeLine._duedate_breakpoints['warning'] and days_left > TimeLine._duedate_breakpoints['danger']:
-            return f'{days_left} days left', TimeLine._attention_colors['warning']
-        elif days_left <= TimeLine._duedate_breakpoints['danger'] and days_left > 0:
-            return f'{days_left} day left!', TimeLine._attention_colors['danger']
-        elif days_left == 0:
-            return f'Due today!', TimeLine._attention_colors['danger']
-        elif days_left < 0:
-            return f'Too late!', TimeLine._attention_colors['danger']
-        else:
-            return None
+
+        time_left = (time_due - datetime.now() + timedelta(days=1)).total_seconds()  # +1days to have end of day
+        # return time_left, TimeLine._duedate_colors['danger']
+        for text, uom, time, msg in TimeLine._duedate_breakpoints:
+            if round(time_left < time * TimeLine._seconds_in_unites[uom]):
+                return f'{abs(round(time_left / TimeLine._seconds_in_unites[uom]))} {TimeLine.get_msg_for_timeuom(uom, round(time_left / TimeLine._seconds_in_unites[uom]))} {msg}', TimeLine._duedate_colors[text]
 
 
 def reverse_dict(x):

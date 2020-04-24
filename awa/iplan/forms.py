@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField, IntegerField
-from wtforms.fields.html5 import DateField
+from wtforms.fields.html5 import DateField, DateTimeField, TimeField
 from wtforms.validators import DataRequired, Length
 
 
@@ -12,9 +12,10 @@ class TaskForm(FlaskForm):
     duration_real = StringField(label='Duration Real')
     category = SelectField(label='Category', coerce=int)
     time_line = SelectField(label='Timeline')
-    time_due = DateField(label='Due Date')
+    time_due = DateField(label='Due Date (End of Day)')
     # Coerce=int - browser sends data in str format so function is needed to transform it
     frequency = SelectField(label='Frequency', coerce=int)
+    # frequency_days = IntegerField(label='Days till next repeat')
     order = IntegerField(label='Order')
     id_strategy = SelectField(label='Strategy', coerce=int)
     submit = SubmitField(label='Add Task')
