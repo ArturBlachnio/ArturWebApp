@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from awa import db
-from awa.iplan.models import Strategy, Task
-from awa.iplan.forms import StrategyForm, TaskForm
+from awa.iplan.models import Strategy, Task, Project
+from awa.iplan.forms import StrategyForm, TaskForm, ProjectForm
 from awa.iplan._initial_setup import *
 from datetime import timedelta, date, datetime, time
 from awa.iplan.utils import (TimeLine, duration_from_string, string_from_duration, reverse_dict, reorder_tasks,
@@ -22,13 +22,18 @@ def home():
 def timeline():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
     strategies = Strategy.query.all()
+    projects = Project.query.all()
     # todo - count using sql
-    count_tasks = dict(zip([strategy.id for strategy in strategies], [0 for _ in range(len(strategies))]))
+    count_tasks_strategy = dict(zip([strategy.id for strategy in strategies], [0 for _ in range(len(strategies))]))
+    count_tasks_project = dict(zip([project.id for project in projects], [0 for _ in range(len(projects))]))
     for task in tasks:
-        if task.strategy.id in count_tasks:
-            count_tasks[task.strategy.id] += 1
+        if task.strategy.id in count_tasks_strategy:
+            count_tasks_strategy[task.strategy.id] += 1
+        if task.project.id in count_tasks_project:
+            count_tasks_project[task.project.id] += 1
 
-    return render_template('iplan/timeline.html', tasks=tasks, TimeLine=TimeLine, strategies=strategies, count_tasks=count_tasks,
+    return render_template('iplan/timeline.html', tasks=tasks, TimeLine=TimeLine, strategies=strategies, projects=projects,
+                           count_tasks_strategy=count_tasks_strategy, count_tasks_project=count_tasks_project,
                            string_from_duration=string_from_duration, now=datetime.now())
 
 
@@ -55,14 +60,6 @@ def task_donetoday():
                            strategies=strategies, sum_duration=sum_duration)
 
 
-@iplan.route('/iplan/task/completed', methods=['GET', 'POST'])
-def task_completed():
-    tasks = Task.query.filter(Task.time_completion.isnot(None)).order_by(Task.order).all()
-    strategies = Strategy.query.all()
-    return render_template('iplan/task.html', tasks=tasks, strategies=strategies,
-                           string_from_duration=string_from_duration, now=datetime.now())
-
-
 @iplan.route('/iplan/task/open', methods=['GET', 'POST'])
 def task_open():
     tasks = Task.query.filter(Task.time_completion.is_(None)).order_by(Task.order).all()
@@ -76,6 +73,9 @@ def task_create(timeline_category='This Week'):
     form_task = TaskForm()
     # Dynamic choices
     form_task.id_strategy.choices = [(item.id, item.name) for item in Strategy.query.order_by(Strategy.order).all()]
+    # Project has extra choice of None -> PROJECT_CHOICE_NONE (set in _utils)
+    form_task.id_project.choices = [(item.id, item.name) for item in Project.query.order_by(Project.order).all()]
+
     form_task.category.choices = TASK_CATEGORY_CHOICES
     form_task.frequency.choices = TASK_FREQUENCY_CHOICES
     form_task.time_line.choices = TimeLine.selectfield_choices()
@@ -87,6 +87,7 @@ def task_create(timeline_category='This Week'):
                 frequency=dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data),
                 frequency_days=form_task.frequency_days.data,
                 id_strategy=form_task.id_strategy.data,
+                id_project=form_task.id_project.data,
                 order=form_task.order.data,
                 time_line=form_task.time_line.data,
                 time_due=datetime(year=form_task.time_due_date.data.year, month=form_task.time_due_date.data.month, day=form_task.time_due_date.data.day)
@@ -109,6 +110,7 @@ def task_update(id_task):
     form_task = TaskForm()
     # Dynamic choices
     form_task.id_strategy.choices = [(item.id, item.name) for item in Strategy.query.all()]
+    form_task.id_project.choices = [(item.id, item.name) for item in Project.query.order_by(Project.order).all()]
     form_task.category.choices = TASK_CATEGORY_CHOICES
     form_task.frequency.choices = TASK_FREQUENCY_CHOICES
     form_task.time_line.choices = TimeLine.selectfield_choices()
@@ -117,6 +119,7 @@ def task_update(id_task):
     if form_task.validate_on_submit():
         task.name = form_task.name.data
         task.id_strategy = form_task.id_strategy.data
+        task.id_project = form_task.id_project.data
         task.desc = form_task.desc.data
         task.category = dict(TASK_CATEGORY_CHOICES).get(form_task.category.data)
         task.frequency = dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data)
@@ -131,6 +134,7 @@ def task_update(id_task):
     elif request.method == 'GET':
         form_task.name.data = task.name
         form_task.id_strategy.data = task.id_strategy
+        form_task.id_project.data = task.id_project
         form_task.desc.data = task.desc
         form_task.category.data = reverse_dict(TASK_CATEGORY_CHOICES).get(task.category, 1)
         form_task.frequency.data = reverse_dict(TASK_FREQUENCY_CHOICES).get(task.frequency, 1)
@@ -332,6 +336,88 @@ def strategy_delete(id_strategy):
         db.session.commit()
         flash('Strategy was deleted', 'success')
     return redirect(url_for('iplan.strategy'))
+
+# ========================================= Projects ===================================================================
+@iplan.route('/iplan/project', methods=['GET', 'POST'])
+def project():
+    projects = Project.query.order_by(Project.order).all()
+    # todo - count using sql
+    count_tasks = {item.id: len(Task.query.filter_by(id_project=item.id).all()) for item in projects}
+    return render_template('iplan/project.html', projects=projects, count_tasks=count_tasks)
+
+
+@iplan.route('/iplan/project/create', methods=['GET', 'POST'])
+def project_create():
+    form_project = ProjectForm()
+    form_project.category.choices = PROJECT_CATEGORY_CHOICES
+    if form_project.validate_on_submit():
+        item_project = Project(name=form_project.name.data, symbol=form_project.symbol.data, desc=form_project.desc.data,
+                               category=dict(PROJECT_CATEGORY_CHOICES).get(form_project.category.data),
+                               color=form_project.color.data, order=form_project.order.data,
+                               duration_plan=duration_from_string(form_project.duration_plan.data),
+                               time_due=datetime(year=form_project.time_due_date.data.year,
+                                                 month=form_project.time_due_date.data.month,
+                                                 day=form_project.time_due_date.data.day)
+                                        + timedelta(hours=form_project.time_due_time.data.hour,
+                                                    minutes=form_project.time_due_time.data.minute))
+        db.session.add(item_project)
+        db.session.commit()
+        return redirect(url_for('iplan.project'))
+    elif request.method == 'GET':
+        form_project.order.data = 0
+        form_project.color.data = 'LightSteelBlue'
+        form_project.time_due_date.data = TimeLine.duedate_per_category_for_new_tasks('Next Week')
+        form_project.time_due_time.data = time(hour=23)
+    return render_template('iplan/project_edit.html', form=form_project, legend='Create New Project')
+
+
+@iplan.route('/iplan/project/update/<id_project>', methods=['GET', 'POST'])
+def project_update(id_project):
+    item_project = Project.query.get_or_404(id_project)
+
+    form_project = ProjectForm()
+    form_project.category.choices = PROJECT_CATEGORY_CHOICES
+
+    if form_project.validate_on_submit():
+        item_project.name = form_project.name.data
+        item_project.symbol = form_project.symbol.data
+        item_project.desc = form_project.desc.data
+        item_project.category = dict(PROJECT_CATEGORY_CHOICES).get(form_project.category.data)
+        item_project.color = form_project.color.data
+        item_project.order = form_project.order.data
+        item_project.duration_plan = duration_from_string(form_project.duration_plan.data)
+        item_project.time_due = datetime(year=form_project.time_due_date.data.year, month=form_project.time_due_date.data.month,
+                          day=form_project.time_due_date.data.day) + timedelta(hours=form_project.time_due_time.data.hour, minutes=form_project.time_due_time.data.minute)
+        db.session.commit()
+        return redirect(url_for('iplan.project'))
+    elif request.method == 'GET':
+        form_project.name.data = item_project.name
+        form_project.symbol.data = item_project.symbol
+        form_project.desc.data = item_project.desc
+        form_project.category.data = reverse_dict(PROJECT_CATEGORY_CHOICES).get(item_project.category, 1)
+        form_project.color.data = item_project.color
+        form_project.order.data = item_project.order
+        form_project.duration_plan.data = string_from_duration(item_project.duration_plan)
+        form_project.time_due_date.data = item_project.time_due
+        form_project.time_due_time.data = item_project.time_due
+    return render_template('iplan/project_edit.html', form=form_project, legend='Update Project')
+
+
+@iplan.route('/iplan/project/delete/<id_project>')
+def project_delete(id_project):
+    item_project = Project.query.get_or_404(id_project)
+    db.session.delete(item_project)
+    db.session.commit()
+    return redirect(url_for('iplan.project'))
+
+
+@iplan.route('/iplan/task/show_project_timeline_<id_project>', methods=['GET', 'POST'])
+def show_project_timeline(id_project):
+    project = Project.query.get_or_404(id_project)
+    project.show_timeline = not project.show_timeline
+    db.session.commit()
+    return redirect(request.referrer)
+
 
 # todo - strategy: when tasks are there - add to route strategy_delete nr of task
 # todo - strategy: when tasks are there - add to route strategy_update nr of task

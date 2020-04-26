@@ -30,7 +30,20 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.id_strategy(class="form-control form-control-sm text-primary", placeholder='Task') }}
+                        {{ form_task.id_strategy(class="form-control form-control-sm text-primary", placeholder='Strategy') }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_task.id_project.label(class="form-control-label text-info text-info") }}
+                    {% if form_task.id_project.errors %}
+                        {{ form_task.id_project(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.id_project.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.id_project(class="form-control form-control-sm text-primary", placeholder='Project') }}
                     {% endif %}
                 </div>
                 <div class="form-group">

@@ -6,11 +6,21 @@
             <a  href="{{url_for('iplan.show_menu_all', state='on') }}" class="btn btn-secondary btn-sm" role="button">Menu On</a>
             <a  href="{{url_for('iplan.show_menu_all', state='off') }}" class="btn btn-secondary btn-sm" role="button">Menu Off</a>
             {% for strategy in strategies %}
-                {% if count_tasks[strategy.id] > 0%}
+                {% if count_tasks_strategy[strategy.id] > 0%}
                     {% if strategy.show_timeline %}
-                        <a  href="{{url_for('iplan.show_strategy_timeline', id_strategy=strategy.id) }}" class="btn btn-sm" style="background-color:{{strategy.color}}" role="button">{{strategy.symbol}} ({{count_tasks[strategy.id]}})</a>
+                        <a  href="{{url_for('iplan.show_strategy_timeline', id_strategy=strategy.id) }}" class="btn btn-sm" style="background-color:{{strategy.color}}" role="button">{{strategy.symbol}} ({{count_tasks_strategy[strategy.id]}})</a>
                     {% else %}
-                        <a  href="{{url_for('iplan.show_strategy_timeline', id_strategy=strategy.id) }}" class="btn btn-dark btn-sm" role="button">{{strategy.symbol}} ({{count_tasks[strategy.id]}})</a>
+                        <a  href="{{url_for('iplan.show_strategy_timeline', id_strategy=strategy.id) }}" class="btn btn-dark btn-sm" role="button">{{strategy.symbol}} ({{count_tasks_strategy[strategy.id]}})</a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% for project in projects %}
+                {% if count_tasks_project[project.id] > 0%}
+                    {% if project.show_timeline %}
+                        <a  href="{{url_for('iplan.show_project_timeline', id_project=project.id) }}" class="btn btn-sm" style="background-color:{{project.color}}" role="button">{{project.symbol}} ({{count_tasks_project[project.id]}})</a>
+                    {% else %}
+                        <a  href="{{url_for('iplan.show_project_timeline', id_project=project.id) }}" class="btn btn-dark btn-sm" role="button">{{project.symbol}} ({{count_tasks_project[project.id]}})</a>
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -22,7 +32,7 @@
                 <small class="timeline_header text-muted">(due {{TimeLine.duedate_per_category_for_new_tasks(timeline)}})</small>
                 <a href="{{ url_for('iplan.task_create', timeline_category=timeline) }}"><small class="timeline_header text-primary">New Task</small></a>
                 {% for task in tasks %}
-                    {% if task.time_line == timeline and task.strategy.show_timeline %}
+                    {% if task.time_line == timeline and task.strategy.show_timeline and task.project.show_timeline %}
                         <!-- SHOW MENU is ON -->
                         {% if task.show_menu == False %}
                             <div class="row rounded border border border-secondary timeline_task_name pl-1  mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">

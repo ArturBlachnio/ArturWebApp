@@ -1,26 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container">
-    <!-- Strategy list: -->
-    <!-- Nice color picker here https://www.w3schools.com/colors/colors_names.asp-->
    <div class="content-section">
-       Your strategies:
-        {% for item in strategies %}
+       Your Projects:
+        {% for item in projects %}
         <div class="row m-0">
             <div class="col-4 rounded-left mt-1 mb-1" style="background-color:{{item.color}}">
                 {{item.name}}
             </div>
             <div class="col border rounded-right mt-1 mb-1">
                 <div class="row p-0">
-                    <div class="col-auto">
-                        <small>id={{item.id}}, order={{item.order}}</small>
+                    <div class="col">
+                        <small>id={{item.id}}</small>
                     </div>
                     <div class="col-auto ml-auto">
-                        <a href="{{url_for('iplan.strategy_update', id_strategy=item.id)}}" class="badge badge-secondary">Update</a>
-                        {% if count_tasks[item.id] != 0 %}
-                            <a href="{{url_for('iplan.strategy_delete', id_strategy=item.id)}}" class="badge badge-danger">Delete ({{count_tasks[item.id]}})</a>
+                        <a href="{{url_for('iplan.project_update', id_project=item.id)}}" class="badge badge-secondary">Update</a>
+                        {% if count_tasks[item.id] %}
+                            <a href="{{url_for('iplan.project_delete', id_project=item.id)}}" class="badge badge-danger">Delete ({{count_tasks[item.id]}})</a>
                         {% else %}
-                            <a href="{{url_for('iplan.strategy_delete', id_strategy=item.id)}}" class="badge badge-warning">Delete ({{count_tasks[item.id]}})</a>
+                            <a href="{{url_for('iplan.project_delete', id_project=item.id)}}" class="badge badge-warning">Delete</a>
                         {% endif %}
                     </div>
                 </div>
@@ -30,7 +28,7 @@
     </div>
 
    <div class="content-section">
-        {% for item in strategies %}
+        {% for item in projects %}
         <div class="row m-0">
             <div class="col border rounded-right mt-1 mb-1">
                 <div class="row p-0">

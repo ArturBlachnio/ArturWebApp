@@ -8,6 +8,7 @@ TASK_FREQUENCY_CHOICES = [(1, 'OneTime'), (2, 'Repeatable')]
 
 PROJECT_CATEGORY_CHOICES = [(1, 'Project'), (2, 'Learning'), (3, 'Idea')]
 
+
 # Timeline management
 POSTPONE_HOURS = 2
 POSTPONE_DAYS = 1

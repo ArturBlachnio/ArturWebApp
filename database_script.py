@@ -22,7 +22,9 @@ writer.save()
 
 # Insert data to db
 task = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='task')
-strategy = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='strategy')
 task.to_sql(name='task', con=engine, index=False, if_exists='append')
+strategy = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='strategy')
 strategy.to_sql(name='strategy', con=engine, index=False, if_exists='append')
+project = pd.read_excel(path.join('pickles', 'dbcopy_insert.xlsx'), sheet_name='project')
+project.to_sql(name='project', con=engine, index=False, if_exists='append')
 # Check docs for extra options: e.g. if_exists='replace', index_label='id'
