@@ -47,16 +47,29 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form_task.time_due.label(class="form-control-label text-info text-info") }}
-                    {% if form_task.time_due.errors %}
-                        {{ form_task.time_due(class="form-control form-control-sm is-invalid") }}
+                    {{ form_task.time_due_date.label(class="form-control-label text-info text-info") }}
+                    {% if form_task.time_due_date.errors %}
+                        {{ form_task.time_due_date(class="form-control form-control-sm is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form_task.time_due.errors %}
+                            {% for error in form_task.time_due_date.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form_task.time_due(class="form-control form-control-sm text-primary") }}
+                        {{ form_task.time_due_date(class="form-control form-control-sm text-primary") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_task.time_due_time.label(class="form-control-label text-info text-info") }}
+                    {% if form_task.time_due_time.errors %}
+                        {{ form_task.time_due_time(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.time_due_time.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.time_due_time(class="form-control form-control-sm text-primary") }}
                     {% endif %}
                 </div>
                 <div class="form-group">
@@ -84,6 +97,7 @@
                     {% else %}
                         {{ form_task.category(class="form-control form-control-sm text-primary", placeholder='Description') }}
                     {% endif %}
+                </div>
                 <div class="form-group">
                     {{ form_task.frequency.label(class="form-control-label text-info") }}
                     {% if form_task.frequency.errors %}
@@ -97,6 +111,18 @@
                         {{ form_task.frequency(class="form-control form-control-sm text-primary", placeholder='Description') }}
                     {% endif %}
                 </div>
+                <div class="form-group">
+                    {{ form_task.frequency_days.label(class="form-control-label text-info") }}
+                    {% if form_task.frequency_days.errors %}
+                        {{ form_task.frequency_days(class="form-control form-control-sm is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form_task.frequency_days.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form_task.frequency_days(class="form-control form-control-sm text-primary", placeholder=1) }}
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     {{ form_task.duration_plan.label(class="form-control-label text-info") }}

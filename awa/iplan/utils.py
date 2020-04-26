@@ -1,5 +1,7 @@
-from datetime import timedelta, datetime, date
+from datetime import timedelta, datetime, date, time
+from calendar import monthrange
 import re
+from awa.iplan._initial_setup import POSTPONE_DAYS, POSTPONE_HOURS
 
 
 class TimeLine:
@@ -11,6 +13,16 @@ class TimeLine:
     _thismonth = 'This Month'
     _thisyear = 'This Year'
     categories = [_now, _later, _thisweek, _nextweek, _thismonth, _thisyear]
+
+    # Returns for each category last hour for due dates
+    _n = datetime.now()
+    _todaydue = datetime(year=_n.year, month=_n.month, day=_n.day, hour=23)
+    _categories_duedates = {_now: _todaydue,
+                            _later: _todaydue,
+                            _thisweek: _todaydue + timedelta(days=7-_n.isoweekday()),
+                            _nextweek: _todaydue + timedelta(days=7-_n.isoweekday()) + timedelta(days=7),
+                            _thismonth: datetime(year=_n.year, month=_n.month, day=monthrange(year=_n.year, month=_n.month)[1], hour=23),
+                            _thisyear: datetime(year=_n.year, month=12, day=31, hour=23)}
 
     # Timeline progress indicators (moments since creation) [(category, timeUoM, (warning, danger))]
     _progress_breakpoints = [(_now, 'h', (2, 6)),
@@ -73,7 +85,6 @@ class TimeLine:
                 else:
                     return None
 
-
     @staticmethod
     def get_msg_for_timeuom(uom, value):
         """ Return msg of hours, days left (1hr, 2hrs, 2days)"""
@@ -97,12 +108,25 @@ class TimeLine:
         """ Returns amount of days till due time"""
         if time_due is None:
             return None
-
-        time_left = (time_due - datetime.now() + timedelta(days=1)).total_seconds()  # +1days to have end of day
-        # return time_left, TimeLine._duedate_colors['danger']
+        time_left = (time_due - datetime.now()).total_seconds()
         for text, uom, time, msg in TimeLine._duedate_breakpoints:
             if round(time_left < time * TimeLine._seconds_in_unites[uom]):
                 return f'{abs(round(time_left / TimeLine._seconds_in_unites[uom]))} {TimeLine.get_msg_for_timeuom(uom, round(time_left / TimeLine._seconds_in_unites[uom]))} {msg}', TimeLine._duedate_colors[text]
+
+    @staticmethod
+    def duedate_per_category_for_new_tasks(timeline_category):
+        """ Return due_date for new tasks as LAST HOUR FULLFILLING given timeline category"""
+        return TimeLine._categories_duedates.get(timeline_category, TimeLine._todaydue)
+
+
+def postpone_task(time_due, duration):
+    """ Returns new due_datetime increased by duration """
+    if duration == 'h':
+        return time_due + timedelta(hours=POSTPONE_HOURS)
+    elif duration == 'd':
+        return time_due + timedelta(days=POSTPONE_DAYS)
+    else:
+        return time_due
 
 
 def reverse_dict(x):

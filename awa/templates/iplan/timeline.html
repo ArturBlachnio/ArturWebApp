@@ -19,35 +19,46 @@
         <div class="col-md-4 border p-1 rounded">
             <div class="col-12 border timeline_task_border rounded p-0">
                 <small class="timeline_header ml-1">{{ timeline }} </small>
-                <small class="timeline_header text-muted">XYZ</small>
+                <small class="timeline_header text-muted">(due {{TimeLine.duedate_per_category_for_new_tasks(timeline)}})</small>
                 <a href="{{ url_for('iplan.task_create', timeline_category=timeline) }}"><small class="timeline_header text-primary">New Task</small></a>
                 {% for task in tasks %}
                     {% if task.time_line == timeline and task.strategy.show_timeline %}
-                        <!-- Name -->
+                        <!-- SHOW MENU is ON -->
                         {% if task.show_menu == False %}
                             <div class="row rounded border border border-secondary timeline_task_name pl-1  mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
+                                <!-- PROGRESS INDICATOR is ON (TIME_DUE) -->
                                 {% if TimeLine.progress_indicator(task.time_creation, timeline)[0] %}
                                     <div class="col text-truncate p-0 m-0 mr-1">
                                         <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
                                     </div>
                                     <div class="col-auto p-0 m-0 text-right">
+                                        {% if task.frequency == 'Repeatable' %}
+                                            <small class="badge badge-secondary progress_indicator">R</small>
+                                        {% endif %}
                                         {% if TimeLine.duedate_indicator(task.time_due)[0] %}
                                             <small class="{{TimeLine.duedate_indicator(task.time_due)[1]}} m-0 progress_indicator">{{TimeLine.duedate_indicator(task.time_due)[0]}}</small>
                                         {% else %}
                                             <small class="{{TimeLine.progress_indicator(task.time_creation, timeline)[1]}}  progress_indicator">{{TimeLine.progress_indicator(task.time_creation, timeline)[0]}}</small>
                                         {% endif %}
+                                        <!-- REAPEATABLE MARK -->
                                     </div>
+                                <!-- PROGRESS INDICATOR is OFF (TIME_DUE) -->
                                 {% else %}
                                     <div class="col text-truncate p-0 m-0 mr-1">
                                         <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
                                     </div>
-                                    {% if TimeLine.duedate_indicator(task.time_due)[0] %}
-                                        <div class="col-auto p-0 m-0 text-right">
-                                            <small class="{{TimeLine.duedate_indicator(task.time_due)[1]}} progress_indicator">{{TimeLine.duedate_indicator(task.time_due)[0]}}</small>
-                                        </div>
+                                    <div class="col-auto p-0 m-0 text-right">
+                                    <!-- REAPEATABLE MARK -->
+                                    {% if task.frequency == 'Repeatable' %}
+                                        <small class="badge badge-secondary progress_indicator">R</small>
                                     {% endif %}
+                                    {% if TimeLine.duedate_indicator(task.time_due)[0] %}
+                                        <small class="{{TimeLine.duedate_indicator(task.time_due)[1]}} progress_indicator">{{TimeLine.duedate_indicator(task.time_due)[0]}}</small>
+                                    {% endif %}
+                                    </div>
                                 {% endif %}
                             </div>
+                        <!-- SHOW MENU is OFF -->
                         {% else %}
                             <div class="row rounded-top border border-bottom-0 border-secondary timeline_task_name pl-1 pb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
                                 <a href="{{url_for('iplan.show_menu', id_task=task.id, state='off') }}" class="show_menu_links">{{task.name}}</a>
@@ -77,6 +88,8 @@
                                 <a href="{{url_for('iplan.task_delete', id_task=task.id) }}" class="badge badge-dark">Del</a>
                                 <a href="#" data-toggle="tooltip" class="badge badge-info" data-html="true" title="{{task}}">i</a>
                                 <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary ml-auto">Edit</a>
+                                <a href="{{url_for('iplan.task_postpone', id_task=task.id, duration='h') }}" class="badge badge-dark">+h</a>
+                                <a href="{{url_for('iplan.task_postpone', id_task=task.id, duration='d') }}" class="badge badge-dark">+d</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top')}}" class="badge badge-secondary">top</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up')}}" class="badge badge-secondary">up</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='down')}}" class="badge badge-secondary">dn</a>

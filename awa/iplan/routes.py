@@ -3,8 +3,9 @@ from awa import db
 from awa.iplan.models import Strategy, Task
 from awa.iplan.forms import StrategyForm, TaskForm
 from awa.iplan._initial_setup import *
-from datetime import timedelta, date, datetime
-from awa.iplan.utils import (TimeLine, duration_from_string, string_from_duration, reverse_dict, reorder_tasks)
+from datetime import timedelta, date, datetime, time
+from awa.iplan.utils import (TimeLine, duration_from_string, string_from_duration, reverse_dict, reorder_tasks,
+                             postpone_task)
 
 
 iplan = Blueprint(name='iplan', import_name=__name__)
@@ -84,10 +85,12 @@ def task_create(timeline_category='This Week'):
                 duration_real=duration_from_string(form_task.duration_real.data),
                 category=dict(TASK_CATEGORY_CHOICES).get(form_task.category.data),
                 frequency=dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data),
+                frequency_days=form_task.frequency_days.data,
                 id_strategy=form_task.id_strategy.data,
                 order=form_task.order.data,
                 time_line=form_task.time_line.data,
-                time_due=form_task.time_due.data)
+                time_due=datetime(year=form_task.time_due_date.data.year, month=form_task.time_due_date.data.month, day=form_task.time_due_date.data.day)
+                         + timedelta(hours=form_task.time_due_time.data.hour, minutes=form_task.time_due_time.data.minute))
         db.session.add(task)
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -95,7 +98,9 @@ def task_create(timeline_category='This Week'):
         form_task.order.data = 0
         form_task.submit.label.text = 'Create task'
         form_task.time_line.data = timeline_category
-        form_task.time_due.data = datetime.now() + timedelta(days=DUE_DATE_INITIAL_DAYS)
+        form_task.time_due_date.data = TimeLine.duedate_per_category_for_new_tasks(timeline_category)
+        form_task.time_due_time.data = time(hour=23)
+        form_task.frequency_days.data = 1
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Create New Task')
 
 
@@ -115,10 +120,11 @@ def task_update(id_task):
         task.desc = form_task.desc.data
         task.category = dict(TASK_CATEGORY_CHOICES).get(form_task.category.data)
         task.frequency = dict(TASK_FREQUENCY_CHOICES).get(form_task.frequency.data)
+        task.frequency_days = form_task.frequency_days.data
         task.duration_plan = duration_from_string(form_task.duration_plan.data)
         task.duration_real = duration_from_string(form_task.duration_real.data)
         task.time_line = form_task.time_line.data
-        task.time_due = form_task.time_due.data
+        task.time_due = datetime(year=form_task.time_due_date.data.year, month=form_task.time_due_date.data.month, day=form_task.time_due_date.data.day) + timedelta(hours=form_task.time_due_time.data.hour, minutes=form_task.time_due_time.data.minute)
         task.order = form_task.order.data
         db.session.commit()
         return redirect(url_for('iplan.timeline'))
@@ -128,11 +134,13 @@ def task_update(id_task):
         form_task.desc.data = task.desc
         form_task.category.data = reverse_dict(TASK_CATEGORY_CHOICES).get(task.category, 1)
         form_task.frequency.data = reverse_dict(TASK_FREQUENCY_CHOICES).get(task.frequency, 1)
+        form_task.frequency_days.data = task.frequency_days
         form_task.duration_plan.data = string_from_duration(task.duration_plan)
         form_task.duration_real.data = string_from_duration(task.duration_real)
         form_task.order.data = task.order
         form_task.time_line.data = task.time_line
-        form_task.time_due.data = task.time_due
+        form_task.time_due_date.data = task.time_due
+        form_task.time_due_time.data = task.time_due
         form_task.submit.label.text = 'Update task'
     return render_template('iplan/task_edit.html', form_task=form_task, legend='Update Task')
 
@@ -145,10 +153,17 @@ def task_complete(id_task):
     if task.frequency == 'Repeatable':
         new_task = Task(name=task.name, desc=task.desc,
                         duration_plan=task.duration_plan, duration_real=timedelta(0),
-                        category=task.category, frequency=task.frequency,
+                        category=task.category,
+                        frequency=task.frequency,
+                        frequency_days=task.frequency_days,
                         id_strategy=task.id_strategy, order=task.order,
                         time_line='This Week',
-                        time_creation=datetime.now() + timedelta(days=1))
+                        show_menu=False,
+                        time_creation=datetime.now() + timedelta(days=task.frequency_days),
+                        time_due=datetime(year=(datetime.now()+timedelta(days=task.frequency_days)).year,
+                                          month=(datetime.now()+timedelta(days=task.frequency_days)).month,
+                                          day=(datetime.now()+timedelta(days=task.frequency_days)).day,
+                                          hour=23))
         db.session.add(new_task)
     db.session.commit()
     return redirect(url_for('iplan.timeline'))
@@ -182,7 +197,13 @@ def task_move_timeline(id_task, direction):
     return redirect(url_for('iplan.timeline'))
 
 
-# 'iplan.task_timeline_move', id_task=task.id, direction='right')
+@iplan.route('/iplan/task/move_postpone_by_<duration>/<id_task>', methods=['GET', 'POST'])
+def task_postpone(id_task, duration):
+    task = Task.query.get_or_404(id_task)
+    task.time_due = postpone_task(time_due=task.time_due, duration=duration)
+    db.session.commit()
+    return redirect(url_for('iplan.timeline'))
+
 
 @iplan.route('/iplan/task/timer_start/<id_task>')
 def task_timer_start(id_task):

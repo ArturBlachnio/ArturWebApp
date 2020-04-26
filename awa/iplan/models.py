@@ -42,6 +42,7 @@ class Task(db.Model):
     desc = db.Column(db.Text)
     category = db.Column(db.String(20))
     frequency = db.Column(db.String(10))
+    frequency_days = db.Column(db.Integer)
     time_creation = db.Column(db.DateTime, default=datetime.now)
     time_completion = db.Column(db.DateTime)
     time_due = db.Column(db.DateTime)  # THis is not used now, it was used for old timeline concept
@@ -56,7 +57,7 @@ class Task(db.Model):
 
     def __repr__(self):
         return f"Task(id='{self.id}', name='{self.name}', desc='{self.desc}', category='{self.category}', " \
-               f"frequency='{self.frequency}', time_creation='{self.time_creation}', " \
+               f"frequency='{self.frequency}', frequency_days='{self.frequency_days}', time_creation='{self.time_creation}', " \
                f"time_completion='{self.time_completion}', time_due='{self.time_due}', time_line='{self.time_line}', " \
                f"duration_plan='{self.duration_plan}', duration_real='{self.duration_real}', " \
                f"timer_start='{self.timer_start}', order='{self.order}', show_menu='{self.show_menu}', " \
