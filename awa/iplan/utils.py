@@ -40,7 +40,8 @@ class TimeLine:
                             ('danger', 'h', 4, 'left'),
                             ('warning', 'h', 6, 'left'),
                             ('warning', 'h', 16, 'left'),
-                            ('warning', 'd', 2, 'left'),
+                            ('warning', 'd', 1, 'left'),
+                            ('attention', 'd', 2, 'left'),
                             ('attention', 'd', 3, 'left'))
     _duedate_colors = {'attention': 'badge badge-secondary', 'warning': 'badge badge-warning',
                        'danger': 'badge badge-danger', 'hourslate': 'badge badge-danger', 'dayslate': 'badge badge-danger'}

@@ -33,14 +33,22 @@
                 <a href="{{ url_for('iplan.task_create', timeline_category=timeline) }}"><small class="timeline_header text-primary">New Task</small></a>
                 {% for task in tasks %}
                     {% if task.time_line == timeline and task.strategy.show_timeline and task.project.show_timeline %}
-                        <!-- SHOW MENU is ON -->
+                        <!-- SHOW MENU is OFF -->
                         {% if task.show_menu == False %}
-                            <div class="row rounded border border border-secondary timeline_task_name pl-1  mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
+                            <div class="row rounded border border border-secondary timeline_task_name pl-0  mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
                                 <!-- PROGRESS INDICATOR is ON (TIME_DUE) -->
                                 {% if TimeLine.progress_indicator(task.time_creation, timeline)[0] %}
-                                    <div class="col text-truncate p-0 m-0 mr-1">
+                                    <!-- Project INDICATOR -->
+                                    {% if task.project.symbol != 'None' %}
+                                        <div class="col-auto p-0 m-0">
+                                            <small class="badge badge-info progress_indicator">{{task.project.symbol}}</small>
+                                        </div>
+                                    {% endif %}
+                                    <!-- Task NAME -->
+                                    <div class="col text-truncate p-0 pl-1 m-0 mr-1">
                                         <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
                                     </div>
+                                    <!-- PROGRESS AND DUETIME IDNIDATOR -->
                                     <div class="col-auto p-0 m-0 text-right">
                                         {% if task.frequency == 'Repeatable' %}
                                             <small class="badge badge-secondary progress_indicator">R</small>
@@ -54,7 +62,14 @@
                                     </div>
                                 <!-- PROGRESS INDICATOR is OFF (TIME_DUE) -->
                                 {% else %}
-                                    <div class="col text-truncate p-0 m-0 mr-1">
+                                    <!-- Project INDICATOR -->
+                                    {% if task.project.symbol != 'None' %}
+                                        <div class="col-auto p-0 m-0">
+                                            <small class="badge badge-info progress_indicator">{{task.project.symbol}}</small>
+                                        </div>
+                                    {% endif %}
+                                    <!-- Task NAME -->
+                                    <div class="col text-truncate p-0 pl-1 m-0 mr-1">
                                         <a href="{{url_for('iplan.show_menu', id_task=task.id, state='on') }}" class="show_menu_links" title="{{task.name}}">{{task.name}}</a>
                                     </div>
                                     <div class="col-auto p-0 m-0 text-right">
@@ -68,7 +83,7 @@
                                     </div>
                                 {% endif %}
                             </div>
-                        <!-- SHOW MENU is OFF -->
+                        <!-- SHOW MENU is ON -->
                         {% else %}
                             <div class="row rounded-top border border-bottom-0 border-secondary timeline_task_name pl-1 pb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
                                 <a href="{{url_for('iplan.show_menu', id_task=task.id, state='off') }}" class="show_menu_links">{{task.name}}</a>
