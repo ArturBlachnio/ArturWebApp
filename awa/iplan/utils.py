@@ -14,16 +14,6 @@ class TimeLine:
     _thisyear = 'This Year'
     categories = [_now, _later, _thisweek, _nextweek, _thismonth, _thisyear]
 
-    # Returns for each category last hour for due dates
-    _n = datetime.now()
-    _todaydue = datetime(year=_n.year, month=_n.month, day=_n.day, hour=23)
-    _categories_duedates = {_now: _todaydue,
-                            _later: _todaydue,
-                            _thisweek: _todaydue + timedelta(days=7-_n.isoweekday()),
-                            _nextweek: _todaydue + timedelta(days=7-_n.isoweekday()) + timedelta(days=7),
-                            _thismonth: datetime(year=_n.year, month=_n.month, day=monthrange(year=_n.year, month=_n.month)[1], hour=23),
-                            _thisyear: datetime(year=_n.year, month=12, day=31, hour=23)}
-
     # Timeline progress indicators (moments since creation) [(category, timeUoM, (warning, danger))]
     _progress_breakpoints = [(_now, 'h', (2, 6)),
                             (_later, 'h', (4, 8)),
@@ -117,7 +107,17 @@ class TimeLine:
     @staticmethod
     def duedate_per_category_for_new_tasks(timeline_category):
         """ Return due_date for new tasks as LAST HOUR FULLFILLING given timeline category"""
-        return TimeLine._categories_duedates.get(timeline_category, TimeLine._todaydue)
+        # Returns for each category last hour for due dates
+        _n = datetime.now()
+        _todaydue = datetime(year=_n.year, month=_n.month, day=_n.day, hour=23)
+        _categories_duedates = {TimeLine._now: _todaydue,
+                                TimeLine._later: _todaydue,
+                                TimeLine._thisweek: _todaydue + timedelta(days=7 - _n.isoweekday()),
+                                TimeLine._nextweek: _todaydue + timedelta(days=7 - _n.isoweekday()) + timedelta(days=7),
+                                TimeLine._thismonth: datetime(year=_n.year, month=_n.month,
+                                                     day=monthrange(year=_n.year, month=_n.month)[1], hour=23),
+                                TimeLine._thisyear: datetime(year=_n.year, month=12, day=31, hour=23)}
+        return _categories_duedates.get(timeline_category, _todaydue)
 
 
 def postpone_task(time_due, duration):

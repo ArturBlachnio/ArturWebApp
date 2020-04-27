@@ -56,7 +56,7 @@ def task_donetoday():
             sum_duration[task.strategy.name] += task.duration_real
         else:
             sum_duration[task.strategy.name] = task.duration_real
-    return render_template('iplan/task.html', tasks=tasks, string_from_duration=string_from_duration, now=datetime.now(),
+    return render_template('iplan/summary.html', tasks=tasks, string_from_duration=string_from_duration, now=datetime.now(),
                            strategies=strategies, sum_duration=sum_duration)
 
 
@@ -160,7 +160,9 @@ def task_complete(id_task):
                         category=task.category,
                         frequency=task.frequency,
                         frequency_days=task.frequency_days,
-                        id_strategy=task.id_strategy, order=task.order,
+                        id_strategy=task.id_strategy,
+                        id_project=task.id_project,
+                        order=task.order,
                         time_line='This Week',
                         show_menu=False,
                         time_creation=datetime.now() + timedelta(days=task.frequency_days),
