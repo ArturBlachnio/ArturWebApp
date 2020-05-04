@@ -175,6 +175,26 @@ def task_complete(id_task):
     return redirect(url_for('iplan.timeline'))
 
 
+@iplan.route('/iplan/task/make_copy/<id_task>', methods=['GET', 'POST'])
+def task_make_copy(id_task):
+    task = Task.query.get_or_404(id_task)
+    new_task = Task(name=task.name, desc=task.desc,
+                    duration_plan=task.duration_plan, duration_real=timedelta(0),
+                    category=task.category,
+                    frequency=task.frequency,
+                    frequency_days=task.frequency_days,
+                    id_strategy=task.id_strategy,
+                    id_project=task.id_project,
+                    order=task.order,
+                    time_line=task.time_line,
+                    show_menu=False,
+                    time_creation=datetime.now(),
+                    time_due=task.time_due)
+    db.session.add(new_task)
+    db.session.commit()
+    return redirect(url_for('iplan.timeline'))
+
+
 @iplan.route('/iplan/task/restore/<id_task>', methods=['GET', 'POST'])
 def task_restore(id_task):
     task = Task.query.get_or_404(id_task)
