@@ -15,10 +15,10 @@ class TimeLine:
     categories = [_now, _later, _thisweek, _nextweek, _thismonth, _thisyear]
 
     # Timeline progress indicators (moments since creation) [(category, timeUoM, (warning, danger))]
-    _progress_breakpoints = [(_now, 'h', (2, 6)),
-                            (_later, 'h', (4, 8)),
-                            (_thisweek, 'd', (3, 4)),
-                            (_nextweek, 'w', (1, 3)),
+    _progress_breakpoints = [(_now, 'h', (2, 24)),
+                            (_later, 'h', (4, 48)),
+                            (_thisweek, 'd', (3, 30)),
+                            (_nextweek, 'w', (1, 8)),
                             (_thismonth, 'm', (1, 6)),
                             (_thisyear, 'm', (1, 6))]
     _seconds_in_unites = {'h': 3600, 'd': 24 * 3600, 'w': 7 * 24 * 3600, 'm': 30.416 * 24 * 3600}
