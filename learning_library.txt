@@ -1,4 +1,4 @@
-# We can use multipla databases. Read here more:
+# We can use multiple databases. Read here more:
 https://flask-appbuilder.readthedocs.io/en/latest/multipledbs.html
 
 # SQL alchemy columns

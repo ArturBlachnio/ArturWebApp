@@ -190,6 +190,7 @@ def task_make_copy(id_task):
                     show_menu=False,
                     time_creation=datetime.now(),
                     time_due=task.time_due)
+    print(new_task)
     db.session.add(new_task)
     db.session.commit()
     return redirect(url_for('iplan.timeline'))

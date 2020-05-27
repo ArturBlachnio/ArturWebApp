@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 # To initiate db:
 # (0) make sure you have env-vars: set FLASK_APP=run.py | set FLASK_ENV=development
-# If not done: cmd> flask db init
+# If there is no database: cmd> flask db init
 # (1) cmd> flask db migrate
 # (2) cmd> flask db upgrade
 
@@ -54,7 +54,7 @@ class Project(db.Model):
 
 
 class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(140), nullable=False)
     desc = db.Column(db.Text)
     category = db.Column(db.String(20))

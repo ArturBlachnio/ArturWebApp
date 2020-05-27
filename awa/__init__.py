@@ -17,5 +17,5 @@ app.register_blueprint(main)
 app.register_blueprint(iplan)
 app.register_blueprint(ibudget)
 
-# models
+# Models
 from awa.iplan import models
