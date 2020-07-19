@@ -6,7 +6,9 @@ import shutil
 
 # Create engine (it's in awa)
 engine = create_engine('sqlite:///awa/test.db')
-# print(engine.table_names())
+print(engine.table_names())
+for i in engine.execute("SELECT * FROM task").fetchall()[-5:]:
+    print(i)
 
 # Get data from all tables
 task = pd.read_sql_table('task', 'sqlite:///awa/test.db')
@@ -24,7 +26,7 @@ project.to_excel(writer, sheet_name='project', index=False)
 alembic_version.to_excel(writer, sheet_name='alembic_version', index=False)
 writer.save()
 
-# Copy Excel file to edit it
+# Copy last version of databased into Excel file to edit it
 shutil.copyfile(file_path, os.path.join('pickles', f"database_copy_input.xlsx"))
 
 
