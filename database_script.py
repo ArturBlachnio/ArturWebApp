@@ -31,6 +31,11 @@ shutil.copyfile(file_path, os.path.join('pickles', f"database_copy_input.xlsx"))
 
 
 # Insert data to db
+# If there is no database or if new clean database is needed (remove 'migrations folder and test.db):
+# (0) cmd> flask db init
+# (1) cmd> flask db migrate
+# (2) cmd> flask db upgrade
+
 input_file = os.path.join('pickles', 'database_copy_input.xlsx')
 # input_file = os.path.join('pickles', 'database_copy_2005271615.xlsx')
 # input_file = os.path.join('pickles', 'database_copy_test_fixing.xlsx')
