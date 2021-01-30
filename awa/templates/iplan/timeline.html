@@ -86,7 +86,7 @@
                         <!-- SHOW MENU is ON -->
                         {% else %}
                             <div class="row rounded-top border border-bottom-0 border-secondary timeline_task_name pl-1 pb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
-                                <a href="{{url_for('iplan.show_menu', id_task=task.id, state='off') }}" class="show_menu_links">{{task.name}}</a>
+                                <a href="{{url_for('iplan.show_menu', id_task=task.id, state='off') }}" class="show_menu_links">{{task.name}} ({{TimeLine.duedate_indicator(task.time_due)[0]}})</a>
                             </div>
                             <!-- Buttons -->
                             <div class="row rounded-bottom border border-top-0 border-secondary timeline_task_buttons mb-1 ml-1 mr-1" style="background-color:{{task.strategy.color}}">
