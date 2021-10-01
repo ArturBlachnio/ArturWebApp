@@ -114,13 +114,13 @@
                                 <a href="#" data-toggle="tooltip" class="badge badge-info" data-html="true" title="{{task}}">i</a>
                                 <a href="{{url_for('iplan.task_update', id_task=task.id) }}" class="badge badge-secondary ml-auto">Edit</a>
                                 <a href="{{url_for('iplan.task_postpone', id_task=task.id, duration='h') }}" class="badge badge-dark">+h</a>
-                                <a href="{{url_for('iplan.task_postpone', id_task=task.id, duration='d') }}" class="badge badge-dark">+d</a>
+<!--                                <a href="{{url_for('iplan.task_postpone', id_task=task.id, duration='d') }}" class="badge badge-dark">+d</a>-->
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='top')}}" class="badge badge-secondary">top</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='up')}}" class="badge badge-secondary">up</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='down')}}" class="badge badge-secondary">dn</a>
                                 <a href="{{url_for('iplan.task_move', id_task=task.id, direction='bottom')}}" class="badge badge-secondary">bot</a>
-                                <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='previous') }}" class="badge badge-secondary"><</a>
-                                <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='next') }}" class="badge badge-secondary">></a>
+                                <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='previous') }}" class="badge badge-secondary"><<<</a>
+                                <a href="{{url_for('iplan.task_move_timeline', id_task=task.id, direction='next') }}" class="badge badge-secondary">>>></a>
                                 <a href="{{url_for('iplan.task_make_copy', id_task=task.id)}}" class="badge badge-success">Copy</a>
                             </div>
                         {% endif %}
